@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "MGSDelivery",
-    "slug": "MGSDelivery",
+    "slug": "mgsdelivery",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,9 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -21,10 +19,27 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.mgsdelivery"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "@react-native-firebase/app",
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Mahaveer app to use your location."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1a8b1a9e-d8ad-4e07-bfad-16c43de9b0ec"
+      }
+    },
+    "owner": "faizii_23"
   }
 }

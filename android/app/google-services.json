@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "970641907529",
+    "project_id": "mgsdelivery-e1af4",
+    "storage_bucket": "mgsdelivery-e1af4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970641907529:android:fd69c78dca9afc0d774498",
+        "android_client_info": {
+          "package_name": "com.mgsdelivery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5o0X-8rJlYXfwG9Rt63sHhJUg4clBbd0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
