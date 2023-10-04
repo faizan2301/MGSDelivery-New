@@ -8,17 +8,13 @@ import {
   TouchableOpacity,
   Pressable,
   View,
-  SafeAreaView,
   RefreshControl,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import LinearGradient from "react-native-linear-gradient";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import Icons from "react-native-vector-icons/MaterialCommunityIcons";
 import Entypo from "react-native-vector-icons/Entypo";
 import Octicons from "react-native-vector-icons/Octicons";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import navigationStrings from "../../../constant/navigationStrings";
 import { statusArray } from "../../../constant/constantArray";
 import {
@@ -56,7 +52,7 @@ const Home = (props) => {
   const day = String(currentDate.getDate()).padStart(2, "0");
 
   const formattedDate = `${year}-${month}-${day}`;
-  console.log("getTodaysDate", getTodaysDate());
+  // console.log("getTodaysDate", getTodaysDate());
   var startDate = `${formattedDate}` + "T00:00:00.000Z";
   var endDate = `${formattedDate}` + "T23:59:59.000Z";
   const [range, setRange] = useState({
@@ -100,7 +96,7 @@ const Home = (props) => {
   };
 
   const pikedUpOrders = async () => {
-    console.log("pikedUpOrders");
+    // console.log("pikedUpOrders");
     setModalVisible(false);
     setLoading(true);
     let orderId = [];
@@ -113,13 +109,13 @@ const Home = (props) => {
     // });
     let longitude = location?.longitude;
     let latitude = location?.latitude;
-    console.log(longitude, latitude);
+    // console.log(longitude, latitude);
     if (longitude != null && latitude != null) {
       const pickeStatus = await piked({
         body: { orderId, pickupCords: { latitude, longitude } },
         token,
       });
-      console.log(pickeStatus);
+      // console.log(pickeStatus);
       if (pickeStatus.data) {
         showMessage({ message: pickeStatus.data.data, type: "success" });
         getOrders();
@@ -320,7 +316,9 @@ const Home = (props) => {
     }
   }, [focused]);
   useEffect(() => {
-    getLocation();
+    if (focused) {
+      getLocation();
+    }
   }, [0]);
   const getLocation = async () => {
     await Location.getCurrentPositionAsync({

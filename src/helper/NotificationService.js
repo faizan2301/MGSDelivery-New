@@ -9,29 +9,44 @@ export async function requestUserPermission() {
     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
   if (enabled) {
     console.log("Authorization status:", authStatus);
-    getFcmToken();
-   
+    var token = await getFcmToken();
+
     PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
     );
+    return token;
   }
 }
 
 const getFcmToken = async () => {
-  let checkToken = await AsyncStorage.getItem("fcmToken");
-  console.log("the old token", checkToken);
-  if (!checkToken) {
-    try {
-      const fcmToken = await messaging().getToken();
-      console.log(fcmToken , "new fcm token")
-      if (fcmToken) {
-        console.log("fcme token generated", fcmToken);
-        await AsyncStorage.setItem("fcmToken", fcmToken);
-      }
-    } catch (error) {
-      console.log("error in fcmToken", error);
-      alert(error?.message);
+  // let checkToken = await AsyncStorage.getItem("fcmToken");
+  // console.log("the old token", checkToken);
+  // if (!checkToken) {
+  //   try {
+  //     const fcmToken = await messaging().getToken();
+  //     console.log(fcmToken , "new fcm token")
+  //     if (fcmToken) {
+  //       console.log("fcme token generated", fcmToken);
+  //       await AsyncStorage.setItem("fcmToken", fcmToken);
+  //     }
+  //     return fcmToken;
+  //   } catch (error) {
+  //     console.log("error in fcmToken", error);
+  //     alert(error?.message);
+  //   }
+  // }
+  try {
+    const fcmToken = await messaging().getToken();
+    console.log(fcmToken, "new fcm token");
+    if (fcmToken) {
+      console.log("fcme token generated", fcmToken);
+      await AsyncStorage.setItem("fcmToken", fcmToken);
     }
+    return fcmToken;
+  } catch (error) {
+    console.log("error in fcmToken", error);
+    alert(error?.message);
+    return "";
   }
 };
 export const creatingChannel = async () => {

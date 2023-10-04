@@ -12,13 +12,12 @@ import { saveToken } from "../../redux/slice/tokenSlice";
 import { saveUserData } from "../../redux/slice/authSlice";
 import { useMeMutation } from "../../redux/api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Location from 'expo-location';
-const SplashScreen = props => {
+import * as Location from "expo-location";
+const SplashScreen = (props) => {
   const { navigation } = props;
   const [token, setToken] = useState();
   const dispatch = useDispatch();
   const [me] = useMeMutation();
-
 
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -32,7 +31,6 @@ const SplashScreen = props => {
     }
   };
 
-
   useEffect(() => {
     const fetchDataAndNavigate = async () => {
       try {
@@ -42,7 +40,7 @@ const SplashScreen = props => {
         }
 
         // let { status } = await Location.requestForegroundPermissionsAsync();
-        
+
         // console.log(status,"Spalsh ")
         // if (status !== 'granted') {
         //   setErrorMsg('Permission to access location was denied');
@@ -50,14 +48,14 @@ const SplashScreen = props => {
         // }else{
         //   console.log(status , "location status")
         // }
-        Location.requestForegroundPermissionsAsync()
-  .then(({ status }) => {
-    // Handle the status
-    console.log("Loaction status" , status)
-  })
-  .catch(error => {
-    console.error('Error requesting location permissions:', error);
-  });
+        //       Location.requestForegroundPermissionsAsync()
+        // .then(({ status }) => {
+        //   // Handle the status
+        //   console.log("Loaction status" , status)
+        // })
+        // .catch(error => {
+        //   console.error('Error requesting location permissions:', error);
+        // });
         navigate(); // After fetching data and checking permissions, navigate
       } catch (error) {
         console.error(error);
@@ -77,7 +75,6 @@ const SplashScreen = props => {
   }, []); // Pass an empty dependency array to run this effect only once when the component mounts
 
   const navigate = async () => {
-
     const token = await getData();
     if (token) {
       dispatch(saveToken(token));

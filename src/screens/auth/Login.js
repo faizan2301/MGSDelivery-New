@@ -12,7 +12,7 @@ import * as Animatable from "react-native-animatable";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import BackGround from "../../components/Background";
 import LottieView from "lottie-react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import imageConstant from "../../constant/imageConstant";
 
 import navigationStrings from "../../constant/navigationStrings";
@@ -25,6 +25,7 @@ import {
   saveCredentials,
   saveTokentoAsync,
 } from "../../common/AsyncStorageFunctions";
+import MultipleCheckboxes from "../../components/MultipleCheckbox";
 const Login = (props) => {
   const { navigation } = props;
   const [mobileNumber, setMobileNumber] = useState("");
@@ -36,19 +37,34 @@ const Login = (props) => {
   const [modalVal, setModalVal] = useState(false);
   const dispatch = useDispatch();
   const [login, { isError, error, isLoading }] = useLoginApiMutation();
-  const [me] = useMeMutation()
+  const [me] = useMeMutation();
   const bounceAniref = useRef();
 
-
-  const storeData = async (value) => {
-    try {
-      await AsyncStorage.setItem('token', JSON.stringify(value));
-    } catch (e) {
-      // saving error
-      console.log(e,"async storage error")
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
+  const [labels, setLabels] = useState([
+    "Permission for location",
+    "Permission for camera",
+    "Permission for notification",
+    // Add more labels as needed
+  ]);
+  const handleCheckboxChange = (label, checked) => {
+    // Update the selected checkboxes array based on the checkbox label and checked state
+    if (checked) {
+      setSelectedCheckboxes([...selectedCheckboxes, label]);
+    } else {
+      setSelectedCheckboxes(
+        selectedCheckboxes.filter((item) => item !== label)
+      );
     }
   };
-
+  const storeData = async (value) => {
+    try {
+      await AsyncStorage.setItem("token", JSON.stringify(value));
+    } catch (e) {
+      // saving error
+      console.log(e, "async storage error");
+    }
+  };
 
   const onLogin = () => {
     // Validate mobile number
@@ -64,17 +80,25 @@ const Login = (props) => {
       animate();
       return;
     }
+    console.log("lenght", selectedCheckboxes.length);
+    if (selectedCheckboxes.length < 2) {
+      showMessage({
+        message: "Please grant all the permissions",
+        type: "warning",
+      });
+      return;
+    }
     setModalVal(true);
     loginWithMobileandPassword();
   };
 
   const loginWithMobileandPassword = async () => {
     const fcmToken = await AsyncStorage.getItem("fcmToken");
-    var body = { phoneNumber: mobileNumber, password ,fcmToken};
+    var body = { phoneNumber: mobileNumber, password, fcmToken };
     var response = await login(body);
     setModalVal(false);
     if (response?.data?.access_token) {
-      await storeData(response.data.access_token)
+      await storeData(response.data.access_token);
       dispatch(saveToken(response.data.access_token));
       dispatch(saveUserData(response.data.data));
       await saveCredentials(response.data.data);
@@ -175,6 +199,12 @@ const Login = (props) => {
       {passwordError ? (
         <Text style={styles.errorText}>{passwordError}</Text>
       ) : null}
+
+      <MultipleCheckboxes
+        selectedCheckboxes={selectedCheckboxes}
+        onCheckboxChange={handleCheckboxChange}
+        labels={labels}
+      />
       <Animatable.View ref={bounceAniref}>
         <TouchableOpacity
           onPress={onLogin}

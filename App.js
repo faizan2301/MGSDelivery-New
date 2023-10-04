@@ -8,10 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import * as Notifications from "expo-notifications";
 import { View } from "react-native";
 import messaging from "@react-native-firebase/messaging";
-import {
-  requestUserPermission,
-  creatingChannel,
-} from "./src/helper/NotificationService";
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -22,8 +19,8 @@ Notifications.setNotificationHandler({
 });
 const App = () => {
   useEffect(() => {
-    requestUserPermission();
-    creatingChannel();
+    // requestUserPermission();
+    // creatingChannel();
     messaging().onMessage(async (remoteMessage) => {
       console.log(remoteMessage);
       const { notification, messageId } = remoteMessage;

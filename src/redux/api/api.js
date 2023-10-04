@@ -228,6 +228,21 @@ export const api = createApi({
     }),
 
     // <====================================  Transacton =======================>
+    transactionpost: build.mutation({
+      query: (args) => {
+        console.log("transactions");
+        return {
+          url: "transactions",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
+
     transaction: build.mutation({
       query: (token) => {
         console.log("transactions");
@@ -295,5 +310,6 @@ export const {
   useDeliverOrderMutation,
   useRefusedToAcceptMutation,
   useTransactionMutation,
+  useTransactionpostMutation,
   useGoogledistanceMutation,
 } = api;
