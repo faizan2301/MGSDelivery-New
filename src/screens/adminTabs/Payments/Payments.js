@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import React, { useState } from "react";
 import {
   useCollectMonyFromDeliveryMutation,
@@ -20,12 +20,13 @@ const Payments = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoadin] = useState(false);
   const [user, setUser] = useState({});
-  const [payDeliveryCostState , setPayDeliveryCostState] = useState()
+  const [payDeliveryCostState, setPayDeliveryCostState] = useState();
   const [amount, setAmount] = useState();
 
   const [getalldeliveryboys] = useGetAllDeliveryBoysMutation();
   const [collectMonyFromDelivery] = useCollectMonyFromDeliveryMutation();
-  const [payDeliveryPerson ,{data , isSuccess , isError , error } ] = usePayDeliveryCostMutation()
+  const [payDeliveryPerson, { data, isSuccess, isError, error }] =
+    usePayDeliveryCostMutation();
 
   const getAllDeliveryBoysList = async () => {
     const response = await getalldeliveryboys(token);
@@ -48,35 +49,34 @@ const Payments = ({ navigation }) => {
     }
   };
 
-
-
   useEffect(() => {
     getAllDeliveryBoysList();
   }, []);
 
-  const payDeliveryCosts = async () =>{
-    console.log(payDeliveryCostState , "Delivery Payments" , user)
-    await payDeliveryPerson({body : { amount : payDeliveryCostState , userId : user._id } , token})
-  setModalVisible(false)
-  }
+  const payDeliveryCosts = async () => {
+    console.log(payDeliveryCostState, "Delivery Payments", user);
+    await payDeliveryPerson({
+      body: { amount: payDeliveryCostState, userId: user._id },
+      token,
+    });
+    setModalVisible(false);
+  };
 
-
-  useEffect(()=>{
-    if(isSuccess){
-      getAllDeliveryBoysList()
-      console.log
-      showMessage({ message : data.message , type :"success"})
+  useEffect(() => {
+    if (isSuccess) {
+      getAllDeliveryBoysList();
+      console.log;
+      showMessage({ message: data.message, type: "success" });
     }
-  },[isSuccess])
-  useEffect(()=>{
-    if(isError){
+  }, [isSuccess]);
+  useEffect(() => {
+    if (isError) {
       console.log(error);
-      if(isError){
-        showMessage({ message : error.data.message , type :"danger"})
+      if (isError) {
+        showMessage({ message: error.data.message, type: "danger" });
       }
-
     }
-  },[isError])
+  }, [isError]);
 
   const Items = async ({ item }) => {
     return (
@@ -119,31 +119,33 @@ const Payments = ({ navigation }) => {
         keyExtractor={item => item._id}
         renderItem={Items}
       />} */}
-      {deliveryEmploy.map((data, index) => (
-        <TouchableOpacity
-          key={data._id}
-          onPress={() => {
-            setUser(data);
-            setModalVisible(true);
-          }}
-          className="px-3 flex-row shadow-lg justify-between items-center shadow-black bg-white py-2 rounded-md mt-2"
-        >
-          <View className="flex-row">
-            <View className="h-20 w-20 ">
-              <Image source={{ uri: data.avatar }} className="flex-1" />
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        {deliveryEmploy.map((data, index) => (
+          <TouchableOpacity
+            key={data._id}
+            onPress={() => {
+              setUser(data);
+              setModalVisible(true);
+            }}
+            className="px-3 flex-row shadow-lg justify-between items-center shadow-black bg-white py-2 rounded-md mt-2"
+          >
+            <View className="flex-row">
+              <View className="h-20 w-20 ">
+                <Image source={{ uri: data.avatar }} className="flex-1" />
+              </View>
+              <View className="ml-3">
+                <Text className="text-base font-semibold">{data.userName}</Text>
+                <Text className=" font-bold mt-2"> {data.phoneNumber}</Text>
+              </View>
             </View>
-            <View className="ml-3">
-              <Text className="text-base font-semibold">{data.userName}</Text>
-              <Text className=" font-bold mt-2"> {data.phoneNumber}</Text>
+            <View className="">
+              <Text className="text-green-500 text-base font-bold">
+                ₹{data.pendingBalance}
+              </Text>
             </View>
-          </View>
-          <View className="">
-            <Text className="text-green-500 text-base font-bold">
-              ₹{data.pendingBalance}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      ))}
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
       {modalVisible && (
         <CollectMony
           Collect={Collect}

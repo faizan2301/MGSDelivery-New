@@ -19,7 +19,7 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Octicons from "react-native-vector-icons/Octicons";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import Entypo from "react-native-vector-icons/Entypo";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import imageConstant from "../../../constant/imageConstant";
 import PaymentOptionModal from "../../../components/PaymentOptionModal";
 import VerfyDelivery from "../../../components/VerifyDelivery";
@@ -36,6 +36,8 @@ import { showMessage } from "react-native-flash-message";
 import LoadingModal from "../../../components/LoadingModal";
 import { useIsFocused } from "@react-navigation/native";
 import { getToken } from "../../../common/AsyncStorageFunctions";
+import SplitPaymentOneModal from "../../../components/SplitPaymentOne";
+import SplitPaymentModalTwo from "../../../components/SplitPaymentTwo";
 
 const Deliver = ({ navigation, route }) => {
   const { item } = route.params;
@@ -47,6 +49,12 @@ const Deliver = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [refused, setRefused] = useState(false);
   const [creditTo, setCreditTo] = useState("");
+  const [splitPaymentModalOne, setSplitPaymentModalOne] = useState(false);
+  const [splitPaymentModalTwo, setSplitPaymentModalTwo] = useState(false);
+  const [paymentMethodOne, setPaymentMethodOne] = useState("Cash");
+  const [paymentMethodTwo, setPaymentMethodTwo] = useState("UPI");
+  const [paymentOne, setPaymentOne] = useState();
+  const [paymentTwo, setPaymentTwo] = useState();
   const [amount, setAmount] = useState();
   const [confirmdeliver, setConfirmDeliver] = useState(false);
   const [cancelDelivery, {}] = useCancelMyOrderMutation();
@@ -99,6 +107,7 @@ const Deliver = ({ navigation, route }) => {
       error: deliverdError,
       isSuccess: deliverdIsSuccess,
       isError: delivedIsError,
+      isLoading: deliverdIsLoading,
     },
   ] = useDeliverOrderMutation();
   const [
@@ -119,9 +128,7 @@ const Deliver = ({ navigation, route }) => {
 
   const confirmDelivery = async () => {
     setModalVisible(false);
-
     const googleData = await googledistanceApi(state);
-    console.log(googleData.data.routes[0].distanceMeters, "<><><><>");
     const distance = googleData.data.routes[0].distanceMeters / 1000 || 4;
 
     if (item.billNo.toLowerCase().startsWith("db")) {
@@ -134,6 +141,33 @@ const Deliver = ({ navigation, route }) => {
             dropCords,
             distance,
             paymentMethod: "Credit",
+          },
+          token,
+        });
+      } else if (paymentMethod === "Split") {
+        console.log(
+          "Inside split payment method",
+          paymentMethodOne,
+          " : ",
+          paymentOne
+        );
+        console.log(
+          "Inside split payment method",
+          paymentMethodTwo,
+          " : ",
+          paymentTwo
+        );
+
+        deliverOrder({
+          body: {
+            id: item._id,
+            dropCords,
+            distance,
+            paymentMethod,
+            paymentMethodOne,
+            paymentOne,
+            paymentMethodTwo,
+            paymentTwo,
           },
           token,
         });
@@ -152,7 +186,6 @@ const Deliver = ({ navigation, route }) => {
         });
       }
     } else {
-      console.log("inside all delivery ");
       // cr and all other order will come here
       deliverOrder({
         body: {
@@ -376,34 +409,9 @@ const Deliver = ({ navigation, route }) => {
             <ScrollView
               className="flex-1 bg-[#F4F4FB]   rounded-xl px-4"
               style={{ elevation: 10 }}
-              contentContainerStyle={{}}
+              // contentContainerStyle={{ flex: 1  }}
             >
-              {/* <View className="h-1/6 mb-4 -z-20"> */}
-              {/* {pickupCords && dropCords && <MapView
-                  style={{
-                    width: '100%',
-                    height: '100%',
-
-                  }}
-                  initialRegion={pickupCords}
-                >
-                  <Marker coordinate={pickupCords} />
-                  <Marker coordinate={dropCords} />
-                  <MapViewDirections
-                    origin={pickupCords}
-                    destination={dropCords}
-                    strokeWidth={3}
-                    strokeColor="green"
-                    onReady={(result) => {
-                      setDistance(result.distance)
-                      console.log(result.distance, "distance between pickup and drop location")
-                    }}
-                    apikey="AIzaSyDs4xGW-ewXwerL2yz464noy0_p1b7oxFU" />
-
-                </MapView>} */}
-              {/* </View> */}
-
-              <View className=" ">
+              <View>
                 <Image
                   source={imageConstant.invoice}
                   className="w-20 h-20 self-center mt-4"
@@ -469,60 +477,208 @@ const Deliver = ({ navigation, route }) => {
                   </View>
                 </View>
 
-                {item.dispatched ? (
-                  <View>
-                    {item?.billNo?.toLowerCase().startsWith("db") && (
-                      <View className=" gap-3 mt-1">
-                        {paymentMethod !== "Credit" && (
-                          <View className="flex-row  px-4 py-3 rounded-md border items-end flex-1 ">
-                            <FontAwesome5
-                              name={"rupee-sign"}
+                {/* { <View className="pt-3">
+                    <Text className="font-light text-[#FF7754]">Delivery Details</Text>
+                    { <View className="flex-row gap-2 mt-1 ">
+                      <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
+                        <FontAwesome5
+                          name={"rupee-sign"}
+                          size={25}
+                          color="#444262"
+                        />
+                        <View className="border border-slate-500 ml-3  h-full" />
+                        <Text className=" ml-4 font-medium text-gray-600">
+                          {item?.cost ? item?.cost : "-"}
+                        </Text>
+                      </View>
+                      <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
+                        <MaterialCommunityIcons
+                          name={"map-marker-distance"}
+                          size={25}
+                          color="#444262"
+                        />
+                        <View className="border border-slate-500 ml-3  h-full" />
+                        <Text className=" ml-4 font-medium text-gray-600">
+                          {item?.distance ? item?.distance : "-"}
+                        </Text>
+                      </View>
+                    </View>}
+                  </View>} */}
+              </View>
+              <View className=" mx-1 px-2 py-2 mt-2 ">
+                <Text className="font-medium underline-offset-0">
+                  Payment Section
+                </Text>
+
+                <View className=" gap-2 mt-1 ">
+                  <View className="flex-row  px-4 py-3 rounded-md border">
+                    <TouchableOpacity
+                      className="flex-row items-center justify-between w-full px-4  my-auto"
+                      onPress={() => setOpenList(!openList)}
+                    >
+                      <Text className={`text-slate-500 font-medium`}>
+                        {paymentMethod} {creditTo && ` to ${creditTo}`}
+                      </Text>
+
+                      <Entypo
+                        name={!openList ? "chevron-up" : "chevron-down"}
+                        size={25}
+                        color="#444262"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  {paymentMethod !== "Split" && (
+                    <View className="flex-row  px-4 py-3 rounded-md border ">
+                      <FontAwesome5
+                        name={"rupee-sign"}
+                        size={25}
+                        color="#444262"
+                      />
+                      <TextInput
+                        placeholder="Amount to collect"
+                        className="px-3 "
+                        keyboardType="numeric"
+                        onChangeText={(text) => setAmount(text)}
+                      />
+                    </View>
+                  )}
+                </View>
+
+                {/* // split payment method one */}
+                {paymentMethod === "Split" && (
+                  <View className=" gap-2 mt-1">
+                    <View className="flex-row  px-4 py-3 rounded-md border">
+                      <TouchableOpacity
+                        className="flex-row items-center justify-between w-full px-4  my-auto"
+                        onPress={() => {
+                          setSplitPaymentModalOne(!splitPaymentModalOne);
+                        }}
+                      >
+                        <Text className={`text-slate-500 font-medium`}>
+                          {paymentMethodOne}
+                        </Text>
+
+                        <Entypo
+                          name={
+                            !splitPaymentModalOne
+                              ? "chevron-up"
+                              : "chevron-down"
+                          }
+                          size={25}
+                          color="#444262"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <View className="flex-row  px-4 py-3 rounded-md border ">
+                      <FontAwesome5
+                        name={"rupee-sign"}
+                        size={25}
+                        color="#444262"
+                      />
+                      <TextInput
+                        placeholder="Amount to collect"
+                        className="px-3 "
+                        keyboardType="numeric"
+                        onChangeText={(text) => setPaymentOne(text)}
+                      />
+                    </View>
+                  </View>
+                )}
+
+                {paymentMethod === "Split" && (
+                  <View className=" gap-2 mt-1">
+                    <View className="flex-row  px-4 py-3 rounded-md border">
+                      <TouchableOpacity
+                        className="flex-row items-center justify-between w-full px-4  my-auto"
+                        onPress={() =>
+                          setSplitPaymentModalTwo(!splitPaymentModalTwo)
+                        }
+                      >
+                        <Text className={`text-slate-500 font-medium`}>
+                          {paymentMethodTwo}
+                        </Text>
+
+                        <Entypo
+                          name={
+                            !splitPaymentModalTwo
+                              ? "chevron-up"
+                              : "chevron-down"
+                          }
+                          size={25}
+                          color="#444262"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <View className="flex-row  px-4 py-3 rounded-md border ">
+                      <FontAwesome5
+                        name={"rupee-sign"}
+                        size={25}
+                        color="#444262"
+                      />
+                      <TextInput
+                        placeholder="Amount to collect"
+                        className="px-3 "
+                        keyboardType="numeric"
+                        onChangeText={(text) => setPaymentTwo(text)}
+                      />
+                    </View>
+                  </View>
+                )}
+              </View>
+
+              <View className="py-4">
+                {true ? (
+                  <View className="">
+                    {/* {item?.billNo?.toLowerCase().startsWith("db") && ( */}
+                    {/* <View className=" gap-3 mt-1 border-2 border-green-700">
+                        <View className="flex-row  px-4 py-3 rounded-md border items-end flex-1 ">
+                          <FontAwesome5
+                            name={"rupee-sign"}
+                            size={25}
+                            color="#444262"
+                          />
+                          <View className="border border-slate-500 ml-3 py-2 h-full" />
+                          <TextInput
+                            placeholder="Amount to collect"
+                            className="px-3 py-3"
+                            keyboardType="numeric"
+                            onChangeText={(text) => setAmount(text)}
+                          />
+                        </View> */}
+
+                    {/* <View className="flex-1 border rounded-md py-3">
+                          <TouchableOpacity
+                            className="flex-row items-center justify-between w-full px-4  my-auto"
+                            onPress={() => setOpenList(!openList)}
+                          >
+                            <Text className={`text-slate-500 font-medium`}>
+                              {paymentMethod} {creditTo && ` to ${creditTo}`}
+                            </Text>
+
+                            <Entypo
+                              name={!openList ? "chevron-up" : "chevron-down"}
                               size={25}
                               color="#444262"
                             />
-                            <View className="border border-slate-500 ml-3 py-2 h-full" />
-                            <TextInput
-                              placeholder="Amount to collect"
-                              className="px-3"
-                              keyboardType="numeric"
-                              onChangeText={(text) => setAmount(text)}
-                            />
-                          </View>
-                        )}
-                        {!item.credit && !item.creditApproved && (
-                          <View className="flex-1 border rounded-md py-3">
-                            <TouchableOpacity
-                              className="flex-row items-center justify-between w-full px-4  my-auto"
-                              onPress={() => setOpenList(!openList)}
-                            >
-                              <Text className={`text-slate-500 font-medium`}>
-                                {paymentMethod} {creditTo && ` to ${creditTo}`}
-                              </Text>
-                              <Entypo
-                                name={!openList ? "chevron-up" : "chevron-down"}
-                                size={25}
-                                color="#444262"
-                              />
-                            </TouchableOpacity>
-                          </View>
-                        )}
-                      </View>
-                    )}
+                          </TouchableOpacity> */}
+                    {/* </View> */}
+                    {/* </View> */}
+                    {/* )} */}
+
                     <View className="flex-row gap-3 py-3 ">
-                      {paymentMethod === "Credit" ||
-                        (!item.delivered && !item.credit && (
-                          <Pressable
-                            onPress={() => {
-                              setRefused(true);
-                              setModalVisible(true);
-                            }}
-                            className="bg-[#444262] px-4 py-3 rounded-md flex-1"
-                          >
-                            <Text className="text-center font-medium text-white">
-                              Refuse
-                            </Text>
-                          </Pressable>
-                        ))}
+                      {!item.delivered && !item.credit && (
+                        <Pressable
+                          onPress={() => {
+                            setRefused(true);
+                            setModalVisible(true);
+                          }}
+                          className="bg-[#444262] px-4 py-3 rounded-md flex-1"
+                        >
+                          <Text className="text-center font-medium text-white">
+                            Refuse
+                          </Text>
+                        </Pressable>
+                      )}
                       {!item.delivered && (
                         <Pressable
                           onPress={() => {
@@ -538,23 +694,17 @@ const Deliver = ({ navigation, route }) => {
                               return;
                             }
                             // check the condition order credit and approved by super admin
-                            if (
-                              item.billNo.toLowerCase().startsWith("db") &&
-                              !item.creditApproved &&
-                              amount != item.totalAmount
-                            ) {
-                              showMessage({
-                                message: `Collected amount should be same as bill amount`,
-                                type: "warning",
-                              });
-                              return;
-                            }
+                            // if (item.billNo.toLowerCase().startsWith("db") && !item.creditApproved && amount != item.totalAmount) {
+                            //   showMessage({
+                            //     message: `Collected amount should be same as bill amount`,
+                            //     type: "warning",
+                            //   });
+                            //   return;
+                            // }
                             setModalVisible(true);
                           }}
                           className={`px-4 py-3 rounded-md flex-1 ${
-                            paymentMethod === "Credit" && !item.credit
-                              ? "bg-orange-400"
-                              : item.credit && !item.creditApproved
+                            item.credit && !item.creditApproved
                               ? "bg-red-500 "
                               : item.creditApproved
                               ? "bg-green-500"
@@ -563,23 +713,15 @@ const Deliver = ({ navigation, route }) => {
                         >
                           <Text className="text-center font-medium text-white">
                             {/* { !item.credit ? "Deliver" :  "Awaiting for approval" } */}
-                            {paymentMethod === "Credit" && !item.credit
-                              ? "Request for credit approval"
-                              : item.credit && !item.creditApproved
+                            {item.credit && !item.creditApproved
                               ? "Awaiting approval"
+                              : item.credit && item.creditApproved
+                              ? "Deliver"
                               : "Deliver"}
                           </Text>
                         </Pressable>
                       )}
                     </View>
-                    {openList && (
-                      <PaymentOptionModal
-                        setPaymentMethod={setPaymentMethod}
-                        openList={openList}
-                        setOpenList={setOpenList}
-                        setCreditTo={setCreditTo}
-                      />
-                    )}
                   </View>
                 ) : (
                   <Pressable
@@ -591,32 +733,66 @@ const Deliver = ({ navigation, route }) => {
                     </Text>
                   </Pressable>
                 )}
-                {modalVisible && (
-                  <VerfyDelivery
-                    name={item.name}
-                    item={item}
-                    setModalVisible={setModalVisible}
-                    modalVisible={modalVisible}
-                    amount={amount}
-                    refused={refused}
-                    setRefused={setRefused}
-                    refuseToDeliver={refuseToDeliver}
-                    confirmDelivery={confirmDelivery}
-                    creditOrderApproval={creditOrderApproval}
-                    paymentMethod={paymentMethod}
-                    paid={item.paid}
-                  />
-                )}
-                {loading && <LoadingModal loading={loading} />}
                 <Pressable
                   onPress={() => navigation.goBack()}
-                  className="bg-[#FF7754] px-4 py-3 rounded-md flex-1"
+                  className="bg-[#FF7754] px-4 py-3 rounded-md "
                 >
                   <Text className="text-center font-medium text-white">
                     Back
                   </Text>
                 </Pressable>
               </View>
+
+              {modalVisible && (
+                <VerfyDelivery
+                  name={item.name}
+                  item={item}
+                  setModalVisible={setModalVisible}
+                  modalVisible={modalVisible}
+                  amount={amount}
+                  refused={refused}
+                  setRefused={setRefused}
+                  refuseToDeliver={refuseToDeliver}
+                  confirmDelivery={confirmDelivery}
+                  creditOrderApproval={creditOrderApproval}
+                  paymentMethod={paymentMethod}
+                  paid={item.paid}
+                />
+              )}
+              {openList && (
+                <PaymentOptionModal
+                  setPaymentMethod={setPaymentMethod}
+                  openList={openList}
+                  setOpenList={setOpenList}
+                  setCreditTo={setCreditTo}
+                  item={item}
+                  navigation={navigation}
+                  setPaymentOne={setPaymentOne}
+                />
+              )}
+              {splitPaymentModalOne && (
+                <SplitPaymentOneModal
+                  setPaymentMethodOne={setPaymentMethodOne}
+                  splitPaymentModalOne={splitPaymentModalOne}
+                  setSplitPaymentModalOne={setSplitPaymentModalOne}
+                  paymentMethodOne={paymentMethodOne}
+                  setPaymentOne={setPaymentOne}
+                />
+              )}
+              {splitPaymentModalTwo && (
+                <SplitPaymentModalTwo
+                  setPaymentMethodTwo={setPaymentMethodTwo}
+                  splitPaymentModalTwo={splitPaymentModalTwo}
+                  setSplitPaymentModalTwo={setSplitPaymentModalTwo}
+                  paymentMethodTwo={paymentMethodTwo}
+                  setPaymentTwo={setPaymentTwo}
+                />
+              )}
+              {deliverdIsLoading && (
+                <LoadingModal loading={deliverdIsLoading} />
+              )}
+
+              {/* </View> */}
             </ScrollView>
           </View>
         </TouchableWithoutFeedback>

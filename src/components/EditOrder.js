@@ -15,34 +15,41 @@ import { useEditOrderInfoMutation } from "../redux/api/api";
 import { useSelector } from "react-redux";
 import { showMessage } from "react-native-flash-message";
 
-function EditOrder({ modalVisible, setModalVisible, edit ,setLoading ,navigation}) {
-
+function EditOrder({
+  modalVisible,
+  setModalVisible,
+  edit,
+  setLoading,
+  navigation,
+}) {
   const { name, mobile, address } = edit;
-  const [newData, setNewData] = useState({ name, mobile, address  });
-  const { token } = useSelector(state => state.token);
+  const [newData, setNewData] = useState({ name, mobile, address });
+  const { token } = useSelector((state) => state.token);
 
+  const [editInfo] = useEditOrderInfoMutation();
+  const EditOrderDetails = async () => {
+    setModalVisible(false);
+    setLoading(true);
 
-  const [editInfo] = useEditOrderInfoMutation()
-  const EditOrderDetails = async () =>{
-    setModalVisible(false)
-    setLoading(true)
-
-    const response = await editInfo({body : {
+    const response = await editInfo({
+      body: {
         id: edit._id,
-        newAddress : newData.address,
-        newPhoneNumber : newData.mobile
-    } , token})
-    setLoading(false)
-    if(response.data){
-        showMessage({message :"Information edited successfull" , type:"success"})
-    }else{
-        showMessage({message :"Something went wrong" , type:"danger"})
-    
+        newAddress: newData.address,
+        newPhoneNumber: newData.mobile,
+      },
+      token,
+    });
+    setLoading(false);
+    if (response.data) {
+      showMessage({
+        message: "Information edited successfull",
+        type: "success",
+      });
+    } else {
+      showMessage({ message: "Something went wrong", type: "danger" });
     }
-    navigation.goBack()
- 
-
-  }
+    navigation.goBack();
+  };
   return (
     <View className="flex-1 items-center justify-center ">
       <Modal
@@ -63,17 +70,19 @@ function EditOrder({ modalVisible, setModalVisible, edit ,setLoading ,navigation
               <View className="flex-row mt-3 px-4 py-3 rounded-md border items-end">
                 <FontAwesome name={"user"} size={25} color="#FF7754" />
                 <View className="border border-slate-500 ml-3  h-full" />
-                <Text className=" ml-4 font-medium text-gray-600">{newData?.name}</Text>
+                <Text className=" ml-4 font-medium text-gray-600">
+                  {newData?.name}
+                </Text>
               </View>
               <View className="flex-row mt-3 px-4 py-3 rounded-md border items-end bg-slate-100 focus:border-2 focus:border-orange-400">
                 <FontAwesome5 name={"phone"} size={20} color="#FF7754" />
                 <View className="border border-slate-500 ml-3  h-full" />
                 <TextInput
                   className="px-3 "
-                  keyboardType="text"
+                  keyboardType="default"
                   placeholder="Enter the new Phone number"
                   value={`${newData.mobile}`}
-                  onChangeText={text =>
+                  onChangeText={(text) =>
                     setNewData({ ...newData, mobile: text })
                   }
                 />
@@ -86,9 +95,10 @@ function EditOrder({ modalVisible, setModalVisible, edit ,setLoading ,navigation
                 <TextInput
                   className="px-3 overflow-auto flex-1"
                   multiline={true}
+                  keyboardType="default"
                   placeholder="Enter the new Phone number"
                   value={`${newData.address}`}
-                  onChangeText={text =>
+                  onChangeText={(text) =>
                     setNewData({ ...newData, address: text })
                   }
                 />

@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -15,6 +21,7 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Entypo from "react-native-vector-icons/Entypo";
 import Octicons from "react-native-vector-icons/Octicons";
+import AntDesign from "react-native-vector-icons/AntDesign";
 import navigationStrings from "../../../constant/navigationStrings";
 import { statusArray } from "../../../constant/constantArray";
 import {
@@ -29,11 +36,15 @@ import ConfirmPickedUp from "../../../components/ConfirmPickedUp";
 import LoadingModal from "./../../../components/LoadingModal";
 import * as Location from "expo-location";
 import CalendarModal from "../../../components/CalendarModal";
-import { getTodaysDate } from "../../../constant/dateYYYYMMDD";
-import { getDateBeforeT } from "../../../common/Functions";
+import { formatDate } from "../../../helper/formatDate";
 
 const Home = (props) => {
   const { navigation } = props;
+
+  const currentDate = new Date();
+  const startOfDay = new Date(currentDate);
+  startOfDay.setUTCHours(0, 0, 0, 0); // Set to 12:00:00 AM UTC
+  const endOfDay = new Date(currentDate);
 
   const windowWidth = Dimensions.get("window").width;
   const focused = useIsFocused();
@@ -44,33 +55,121 @@ const Home = (props) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
-  const currentDate = new Date();
-  const year = currentDate.getFullYear();
-  const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are 0-based, so add 1.
-  const day = String(currentDate.getDate()).padStart(2, "0");
 
-  const formattedDate = `${year}-${month}-${day}`;
-  // console.log("getTodaysDate", getTodaysDate());
-  var startDate = `${formattedDate}` + "T00:00:00.000Z";
-  var endDate = `${formattedDate}` + "T23:59:59.000Z";
-  const [range, setRange] = useState({
-    END_DATE: startDate,
-    START_DATE: endDate,
-  });
+  const [startDate, setStartDate] = useState(startOfDay);
+  const [endDate, setEndDate] = useState(endOfDay);
+  const [skip, setSkip] = useState(0);
   const [filterOrder, setFilterOrder] = useState("ready");
 
+  const startDateMemo = useMemo(() => startDate, [startDate]); // Empty dependency array
+  const endDateMemo = useMemo(() => endDate, [endDate]);
+  const skipMemo = useMemo(() => skip, [skip]);
+  const filterMemo = useMemo(() => filterOrder, [filterOrder]);
+
+  const dataIsEnded = useRef(true);
+
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [endData, setEndData] = useState(true);
+
+  const [range, setRange] = useState({
+    END_DATE: endOfDay,
+    START_DATE: startOfDay,
+  });
+
   //  ==============================   Redux Api's  ======================================
-  const [apiCall, { isError, isLoading, error }] = useGetOrdersMutation();
   const [piked] = usePikedupMutation();
-  const [myOrders] = useGetMyOrderMutation();
+  const [myOrders, { data, isSuccess, IsError, error, isLoading }] =
+    useGetMyOrderMutation();
 
   const isPermissionGranted = useSelector(
     (state) => state.cameraPermission.isGranted
   );
   const { token } = useSelector((state) => state.token);
   const { userData } = useSelector((state) => state.user);
+
+  const getOrdersByDate = async () => {
+    setSkip(0);
+    dataIsEnded.current = true;
+    console.log("function is runnig", "get order by date");
+    setCalendarVisible(false);
+    await myOrders({
+      body: {
+        END_DATE: endDateMemo,
+        START_DATE: startDateMemo,
+        skip: skipMemo,
+        orderStatus: filterMemo,
+      },
+      token,
+    });
+  };
+
+  const getOrders = async () => {
+    setCalendarVisible(false);
+
+    if (!dataIsEnded.current) return;
+    await myOrders({
+      body: {
+        END_DATE: endDateMemo,
+        START_DATE: startDateMemo,
+        skip: skipMemo,
+        orderStatus: filterMemo,
+      },
+      token,
+    });
+    setSkip(skip + 20);
+  };
+
+  useEffect(() => {
+    if (isLoading || isLoadingMore) return;
+
+    if (focused) {
+      getOrders(startOfDay, endOfDay);
+    }
+  }, [focused, filterOrder]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      if (isLoading || isLoadingMore) return;
+      if (isSuccess) {
+        if (data.data.length < 0) {
+          dataIsEnded.current = false;
+        }
+        // setHistory(data.data);
+        if (data.data) {
+          if (data.data.length === 0) {
+            setEndData(false);
+          }
+          setItems((prevData) => [...prevData, ...data.data]);
+        }
+      }
+    }
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (IsError) {
+      if (error.data) {
+        showMessage({
+          message: error.data.message,
+          type: "danger",
+        });
+      } else {
+        showMessage({
+          message: "Something went wrong while fetching orders",
+          type: "danger",
+        });
+      }
+    }
+  }, [IsError]);
+
+  const loadMoreData = async () => {
+    if (isLoading || isLoadingMore) return; // Prevent multiple requests
+    console.log("get inside load more", skip);
+    setIsLoadingMore(true); // Set loading flag/ Increase skip by the desired limit
+    await getOrders();
+    setSkip(skip + 20);
+    setIsLoadingMore(false); // Clear loading flag
+  };
 
   const isSelectedAdded = items.map((item, index) => ({
     ...item,
@@ -96,9 +195,7 @@ const Home = (props) => {
   };
 
   const pikedUpOrders = async () => {
-    // console.log("pikedUpOrders");
     setModalVisible(false);
-    setLoading(true);
     let orderId = [];
     selectedItems.forEach((data) => orderId.push(data._id));
 
@@ -133,169 +230,128 @@ const Home = (props) => {
         type: "warning",
       });
     }
-
-    setLoading(false);
   };
   const textBoxWidth = 0.3;
-  const renderItem = ({ item, index }) => {
-    if (filterOrder === "all") {
-      // continue
-    } else {
-      if (filterOrder === "credit" && !item.credit) {
-        return null;
-      }
-      if (filterOrder === "cancel") {
-      }
-
-      if (filterOrder === "delivered") {
-        if (!item.delivered) return;
-      }
-
-      if (filterOrder === "cancelled") {
-        if (!item.isCanceled) return;
-      }
-
-      if (filterOrder == "pending") {
-        if (item.userId) return;
-      }
-      if (filterOrder === "ready") {
-        if (item.dispatched) return;
-        if (item.delivered) return;
-        if (!item.userId) return;
-      }
-      // console.log(filterOrder)
-      if (filterOrder === "dispatched") {
-        if (!item.userId) return;
-        if (!item.dispatched) return;
-        if (!item.dispatched) return;
-        if (item.delivered) return;
-      }
-    }
-
-    return (
-      <>
-        {item ? (
-          <Pressable
-            // onPress={() =>{ navigation.navigate(navigationStrings.DELIVER, { item })  }}
-            onPress={() => {
-              console.log("item", item);
-              !item.dispatched && filterOrder === "ready"
-                ? onSelect(item)
-                : navigation.navigate(navigationStrings.DELIVER, { item });
-            }}
-            className={` m-3 p-2 rounded-lg  mx-4 shadow-xl h-60 overflow-auto shadow-black  bg-white  ${
-              item.isSelected ? "  bg-orange-100" : " "
-            }`}
-            key={index}
-          >
-            <View className="flex-row ">
-              <View className="flex-row w-full justify-between ">
+  const renderItem = useMemo(() => {
+    return ({ item, index }) => {
+      return (
+        <>
+          {item ? (
+            <Pressable
+              // onPress={() =>{ navigation.navigate(navigationStrings.DELIVER, { item })  }}
+              onPress={() => {
+                !item.dispatched && filterOrder === "ready"
+                  ? onSelect(item)
+                  : navigation.navigate(navigationStrings.DELIVER, { item });
+              }}
+              className={` m-3 p-2 rounded-lg  mx-4 shadow-xl h-60 overflow-auto shadow-black  bg-white  ${
+                item.isSelected ? "  bg-orange-100" : " "
+              }`}
+              key={index}
+            >
+              <View className="flex-row ">
+                <View className="flex-row w-full justify-between ">
+                  <View
+                    style={{ marginBottom: 4 }}
+                    className={`flex-row px-5 py-2 rounded-full items-center ${
+                      item.isSelected ? "bg-white" : "bg-slate-200/50"
+                    }`}
+                  >
+                    <FontAwesome name={"user"} size={20} color="#FF7754" />
+                    <Text className="pl-3 font-semibold text-[#444262]">
+                      {item.name}
+                    </Text>
+                  </View>
+                  {!item.creditApproved && item.credit && (
+                    <View className="flex-row px-5 py-2  bg-slate-200/50 rounded-full items-center ">
+                      <FontAwesome name={"history"} size={25} color="#FF7754" />
+                    </View>
+                  )}
+                  {item.creditApproved && (
+                    <View className="flex-row px-5 py-2  bg-green-200/50 rounded-full items-center ">
+                      <FontAwesome name={"check"} size={25} color="#2E8B57" />
+                    </View>
+                  )}
+                </View>
+              </View>
+              <View className="flex-row ">
                 <View
                   style={{ marginBottom: 4 }}
                   className={`flex-row px-5 py-2 rounded-full items-center ${
                     item.isSelected ? "bg-white" : "bg-slate-200/50"
                   }`}
                 >
-                  <FontAwesome name={"user"} size={20} color="#FF7754" />
-                  <Text className="pl-3 font-semibold text-[#444262]">
-                    {item.name}
+                  <FontAwesome5 name={"phone"} size={20} color="#FF7754" />
+                  <Text className="pl-3">{item.mobile}</Text>
+                </View>
+              </View>
+
+              <View className="flex-row ">
+                <View
+                  style={{ marginBottom: 4 }}
+                  className={`flex-row px-5 py-2 rounded-full items-center ${
+                    item.isSelected ? "bg-white" : "bg-slate-200/50"
+                  }`}
+                >
+                  <Entypo name={"clipboard"} size={20} color="#FF7754" />
+                  <Text className="pl-3">{item.billNo}</Text>
+                </View>
+                <View
+                  style={{ marginBottom: 4 }}
+                  className={`flex-row px-5 py-2 rounded-full items-center ${
+                    item.isSelected ? "bg-white" : "bg-slate-200/50"
+                  }`}
+                >
+                  <FontAwesome5
+                    name={"shopping-bag"}
+                    size={20}
+                    color="#FF7754"
+                  />
+                  <Text className="pl-3">{item.totalBags}</Text>
+                </View>
+                <View
+                  style={{ marginBottom: 4 }}
+                  className={`flex-row px-5 py-2 rounded-full items-center ${
+                    item.isSelected ? "bg-white" : "bg-slate-200/50"
+                  }`}
+                >
+                  <FontAwesome5 name={"rupee-sign"} size={20} color="#FF7754" />
+                  <Text className="pl-3">
+                    {item.totalAmount - item.paid < 0
+                      ? 0
+                      : item.totalAmount - item.paid}
                   </Text>
                 </View>
-                {!item.creditApproved && item.credit && (
-                  <View className="flex-row px-5 py-2  bg-slate-200/50 rounded-full items-center ">
-                    <FontAwesome name={"history"} size={25} color="#FF7754" />
-                  </View>
-                )}
-                {item.creditApproved && (
-                  <View className="flex-row px-5 py-2  bg-green-200/50 rounded-full items-center ">
-                    <FontAwesome name={"check"} size={25} color="#2E8B57" />
-                  </View>
-                )}
               </View>
-            </View>
-            <View className="flex-row ">
-              <View
-                style={{ marginBottom: 4 }}
-                className={`flex-row px-5 py-2 rounded-full items-center ${
-                  item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
-              >
-                <FontAwesome5 name={"phone"} size={20} color="#FF7754" />
-                <Text className="pl-3">{item.mobile}</Text>
+              <View className=" flex-1 ">
+                <View
+                  style={{ marginBottom: 4 }}
+                  className={`flex-row px-5 py-2 rounded-full items-center ${
+                    item.isSelected ? "bg-white" : "bg-slate-200/50"
+                  }`}
+                >
+                  <Octicons name={"home"} size={20} color="#FF7754" />
+                  <Text className="pl-3  text-[#444262]">{item.address}</Text>
+                </View>
               </View>
-            </View>
+            </Pressable>
+          ) : (
+            <Text></Text>
+          )}
+        </>
+      );
+    };
+  }, [skip, filterOrder, items]);
 
-            <View className="flex-row ">
-              <View
-                style={{ marginBottom: 4 }}
-                className={`flex-row px-5 py-2 rounded-full items-center ${
-                  item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
-              >
-                <Entypo name={"clipboard"} size={20} color="#FF7754" />
-                <Text className="pl-3">{item.billNo}</Text>
-              </View>
-              <View
-                style={{ marginBottom: 4 }}
-                className={`flex-row px-5 py-2 rounded-full items-center ${
-                  item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
-              >
-                <FontAwesome5 name={"shopping-bag"} size={20} color="#FF7754" />
-                <Text className="pl-3">{item.totalBags}</Text>
-              </View>
-              <View
-                style={{ marginBottom: 4 }}
-                className={`flex-row px-5 py-2 rounded-full items-center ${
-                  item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
-              >
-                <FontAwesome5 name={"rupee-sign"} size={20} color="#FF7754" />
-                <Text className="pl-3">
-                  {item.totalAmount - item.paid < 0
-                    ? 0
-                    : item.totalAmount - item.paid}
-                </Text>
-              </View>
-            </View>
-            <View className=" flex-1 ">
-              <View
-                style={{ marginBottom: 4 }}
-                className={`flex-row px-5 py-2 rounded-full items-center ${
-                  item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
-              >
-                <Octicons name={"home"} size={20} color="#FF7754" />
-                <Text className="pl-3  text-[#444262]">{item.address}</Text>
-              </View>
-            </View>
-          </Pressable>
-        ) : (
-          <Text></Text>
-        )}
-      </>
-    );
-  };
-
-  const renderFilter = ({ item }) => {
-    return userData.role === "Admin" ? (
-      <Pressable
-        onPress={() => setFilterOrder(item.status)}
-        className={` h-12 flex-row items-center justify-center  rounded-full py-2 w-36
-       m-2 ${filterOrder === item.status ? "bg-[#444262]" : "bg-[#C1C0C8]"}`}
-      >
-        <Text
-          className={`font-light text-white text-center ${
-            filterOrder === item.status ? "text-white" : "text-[#444262]"
-          }`}
-        >
-          {item.name}
-        </Text>
-      </Pressable>
-    ) : (
-      !item.admin && (
+  const renderFilter = useMemo(() => {
+    return ({ item }) => {
+      return userData.role === "Admin" ? (
         <Pressable
-          onPress={() => setFilterOrder(item.status)}
+          onPress={() => {
+            setFilterOrder(item.status);
+            setItems([]);
+            setSkip(0);
+          }}
           className={` h-12 flex-row items-center justify-center  rounded-full py-2 w-36
        m-2 ${filterOrder === item.status ? "bg-[#444262]" : "bg-[#C1C0C8]"}`}
         >
@@ -304,17 +360,33 @@ const Home = (props) => {
               filterOrder === item.status ? "text-white" : "text-[#444262]"
             }`}
           >
-            {item.name2 ? item.name2 : item.name}
+            {item.name}
           </Text>
         </Pressable>
-      )
-    );
-  };
-  useEffect(() => {
-    if (focused) {
-      getOrders(startDate, endDate);
-    }
-  }, [focused]);
+      ) : (
+        !item.admin && (
+          <Pressable
+            onPress={() => {
+              setFilterOrder(item.status);
+              setItems([]);
+              setSkip(0);
+            }}
+            className={` h-12 flex-row items-center justify-center  rounded-full py-2 w-36
+       m-2 ${filterOrder === item.status ? "bg-[#444262]" : "bg-[#C1C0C8]"}`}
+          >
+            <Text
+              className={`font-light text-white text-center ${
+                filterOrder === item.status ? "text-white" : "text-[#444262]"
+              }`}
+            >
+              {item.name2 ? item.name2 : item.name}
+            </Text>
+          </Pressable>
+        )
+      );
+    };
+  }, [filterOrder, skip]);
+
   useEffect(() => {
     if (focused) {
       getLocation();
@@ -325,76 +397,26 @@ const Home = (props) => {
       accuracy: Location.Accuracy.High,
     }).then((location) => {
       setLocation(location.coords);
-      console.log(location);
     });
-  };
-  const getOrders = async (startDate, endDate) => {
-    let response;
-    setCalendarVisible(false);
-    if (userData.role === "Admin") {
-      response = await apiCall({
-        body: {
-          END_DATE: endDate,
-          START_DATE: startDate,
-        },
-        token,
-      });
-    } else {
-      response = await myOrders({
-        body: {
-          END_DATE: endDate,
-          START_DATE: startDate,
-        },
-        token,
-      });
-    }
-    if (response.data) {
-      if (response.data.success == true) {
-        setItems(response.data.data);
-      } else {
-        showMessage({
-          message: error.data.message,
-          type: "danger",
-        });
-      }
-    } else {
-      console.log(response);
-      showMessage({
-        message: response.error.data.message,
-        type: "danger",
-      });
-    }
-  };
-  const qrCodeScan = async () => {
-    navigation.navigate(
-      isPermissionGranted
-        ? navigationStrings.SCANQRCODESCREEN
-        : navigationStrings.PERMISSIONSCREEN
-    );
-  };
-
-  const assign = async () => {
-    console.log(selectedItems, ">>>>>>>>>>");
-    // navigation.navigate(navigationStrings.ASSIGNORDER, selectedItems);
   };
 
   const onRefresh = React.useCallback(() => {
+    setSkip(0);
+    setItems([]);
     setRefreshing(true);
-    getOrders(startDate, endDate);
+    setFilterOrder((prevFilter) => prevFilter);
+    getOrders(startOfDay, endOfDay);
     setRefreshing(false);
   }, []);
 
   const onConfirm = React.useCallback(
-    ({ startDate, endDate }) => {
+    ({ startOfDay, endOfDay }) => {
       setCalendarVisible(false);
-      console.log("Calendar", startDate + "YYYY" + endDate);
-      setRange({ startDate, endDate });
+      setEndDate(endOfDay);
+      setStartDate(startOfDay);
     },
-    [calendarVisible, setRange]
+    [calendarVisible]
   );
-
-  // ==================================== Destructure ====================================
-
   return (
     <View className="flex-1 bg-[#F8F8FE] pt-4">
       <View className="flex-row px-2">
@@ -403,22 +425,18 @@ const Home = (props) => {
           className=" flex-1 py-2 shadow-lg shadow-black bg-white mb-3 flex-row mx-2 rounded-full items-center justify-between px-4 "
         >
           <View className="flex-row items-center ">
-            <Text className="text-slate-400 ">
-              {range.START_DATE
-                ? getDateBeforeT(range.START_DATE)
-                : "Select date"}{" "}
-            </Text>
-            <Text className="font-bold text-xl text-[#444262]"> - </Text>
-            <Text className="text-slate-400 ">
-              {range.END_DATE ? getDateBeforeT(range.END_DATE) : "- End date"}
-            </Text>
+            <Text className="text-slate-400 ">{formatDate(startDateMemo)}</Text>
+            <Text className="font-bold text-lg text-[#444262]"> - </Text>
+            <Text className="text-slate-400 ">{formatDate(endDateMemo)}</Text>
           </View>
           <Entypo name="calendar" size={25} color="#444262" />
         </TouchableOpacity>
-        {/* <TouchableOpacity className=" shadow-lg shadow-black bg-white rounded-full w-10 h-10 items-center justify-center  ">
-          <AntDesign name="reload1" size={25}
-            color="#444262" />
-        </TouchableOpacity> */}
+        <TouchableOpacity
+          onPress={() => setSkip(0)}
+          className=" shadow-lg shadow-black bg-white rounded-full w-10 h-10 items-center justify-center  "
+        >
+          <AntDesign name="reload1" size={25} color="#444262" />
+        </TouchableOpacity>
       </View>
 
       <View className="">
@@ -432,13 +450,7 @@ const Home = (props) => {
         />
       </View>
 
-      {isLoading ? (
-        <ActivityIndicator />
-      ) : error ? (
-        <Text style={{ color: "red", fontSize: 20 }}>
-          Error fetching data {error.error}
-        </Text>
-      ) : (
+      {
         <FlatList
           data={isSelectedAdded}
           keyExtractor={(item) => item._id}
@@ -449,8 +461,10 @@ const Home = (props) => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          onEndReached={loadMoreData}
+          onEndReachedThreshold={0.3}
         />
-      )}
+      }
 
       {selectedItems.length > 0 && filterOrder === "ready" ? (
         <TouchableOpacity
@@ -472,7 +486,9 @@ const Home = (props) => {
           range={range}
           setRange={setRange}
           onConfirm={onConfirm}
-          getOrders={getOrders}
+          getOrders={getOrdersByDate}
+          setStartDate={setStartDate}
+          setEndDate={setEndDate}
         />
       )}
       <ConfirmPickedUp
@@ -481,7 +497,7 @@ const Home = (props) => {
         modalVisible={modalVisible}
         selectedItems={selectedItems}
       />
-      <LoadingModal loading={loading} />
+      {isLoading && <LoadingModal loading={isLoading} />}
     </View>
   );
 };

@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// const baseUrl = "http://192.168.1.20:4000";
-const baseUrl = "https://mahaveer.vercel.app/";
+const baseUrl = "http://192.168.1.32:4000";
+// const baseUrl = "https://mahaveer.vercel.app/";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: baseUrl }),
@@ -148,6 +148,78 @@ export const api = createApi({
         };
       },
     }),
+    myCreditOrders: build.mutation({
+      query: (args) => {
+        console.log("admin-credit-orders", args.body);
+        return {
+          url: "admin-credit-orders",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
+    approveCreditByAuthorizedAdmin: build.mutation({
+      query: (args) => {
+        console.log("admin-approve-credit", args.body);
+        return {
+          url: "admin-approve-credit",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
+    rejectCreditRequest: build.mutation({
+      query: (args) => {
+        console.log("admin-reject-credit", args.body);
+        return {
+          url: "admin-reject-credit",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
+
+    customers: build.mutation({
+      query: (args) => {
+        console.log("all customer", args.body);
+        return {
+          url: "credit-customers",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
+
+    customerOrders: build.mutation({
+      query: (args) => {
+        console.log("sa-credit-orders", args.body);
+        return {
+          url: "sa-credit-orders",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
 
     //  <================================> orders Apis <================================>
     // getOrders: build.query({
@@ -217,6 +289,48 @@ export const api = createApi({
         console.log("credit", args.body);
         return {
           url: "credit",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
+    findCreditAuthorizedAdmin: build.mutation({
+      query: (args) => {
+        console.log("credit-authorized-admin", args.body);
+        return {
+          url: "credit-authorized-admin",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
+    findCreditAuthorizedAdmin: build.mutation({
+      query: (args) => {
+        console.log("credit-authorized-admin", args.body);
+        return {
+          url: "credit-authorized-admin",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
+    sendCreditRequiest: build.mutation({
+      query: (args) => {
+        console.log("send-credit-requiest", args.body);
+        return {
+          url: "send-credit-requiest",
           method: "POST",
           body: args.body,
           headers: {
@@ -301,14 +415,23 @@ export const {
   useEditOrderInfoMutation,
   useCollectMonyFromDeliveryMutation,
   usePayDeliveryCostMutation,
+  useMyCreditOrdersMutation,
+  useApproveCreditByAuthorizedAdminMutation,
+  useRejectCreditRequestMutation,
+  useCustomersMutation,
+  useCustomerOrdersMutation,
+
   useGetMyOrderMutation,
   useCancelMyOrderMutation,
   usePikedupMutation,
   useCreditOrderMutation,
   useGetAllDeliveryBoysMutation,
   useAssignOrderApiMutation,
+  // delivery boy
   useDeliverOrderMutation,
   useRefusedToAcceptMutation,
+  useFindCreditAuthorizedAdminMutation,
+  useSendCreditRequiestMutation,
   useTransactionMutation,
   useTransactionpostMutation,
   useGoogledistanceMutation,

@@ -20,6 +20,7 @@
     "@wojtekmaj/react-daterange-picker": "^5.4.3",
     "expo": "~49.0.13",
     "expo-barcode-scanner": "~12.5.3",
+    "expo-linking": "^6.0.0",
     "expo-location": "~16.1.0",
     "expo-notifications": "~0.20.1",
     "expo-splash-screen": "~0.20.5",

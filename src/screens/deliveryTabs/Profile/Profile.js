@@ -4,13 +4,15 @@ import { useSelector } from "react-redux";
 import imageConstant from "../../../constant/imageConstant";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import navigationStrings from "../../../constant/navigationStrings";
+import { saveTokentoAsync } from "../../../common/AsyncStorageFunctions";
 
-const Profile = ({navigation}) => {
-  const { userData } = useSelector(state => state.user);
+const Profile = ({ navigation }) => {
+  const { userData } = useSelector((state) => state.user);
 
-const logOut = async () =>{
-  navigation.navigate(navigationStrings.LOGINSCREEN)
-}
+  const logOut = async () => {
+    await saveTokentoAsync("");
+    navigation.navigate(navigationStrings.LOGINSCREEN);
+  };
   return (
     <View className=" flex-1 rounded-lg shadow-lg relative pt-20 ">
       <View className="w-full h-full absolute  top-0 opacity-50   overflow-hidden ">
@@ -33,7 +35,11 @@ const logOut = async () =>{
         </Text>
         <View className="w-[85%] h-36 shadow-xl mt-2 bg-white mx-auto rounded-2xl flex-row justify-evenly items-center">
           <View className="text-lg">
-            <Text className="text-2xl font-extrabold text-green-400">{userData.pendingBalance > 1000 ? userData.pendingBalance/1000 + "K" : userData.pendingBalance}</Text>
+            <Text className="text-2xl font-extrabold text-green-400">
+              {userData.pendingBalance > 1000
+                ? userData.pendingBalance / 1000 + "K"
+                : userData.pendingBalance}
+            </Text>
           </View>
           {/* <View className="border border-slate-300 h-1/2" /> */}
           {/* <View className="text-lg">
@@ -61,12 +67,15 @@ const logOut = async () =>{
         </View>
 
         <View className="flex-row px-4 absolute bottom-3">
-        {/* <Pressable className="border-2 border-[#444262] py-4 rounded-lg  flex-1 mr-2">
+          {/* <Pressable className="border-2 border-[#444262] py-4 rounded-lg  flex-1 mr-2">
             <Text className="text-[#444262] font-semibold text-center">
               Edit profile
             </Text>
           </Pressable> */}
-          <Pressable onPress={logOut} className="bg-[#444262] py-4 rounded-lg flex-1 ">
+          <Pressable
+            onPress={logOut}
+            className="bg-[#444262] py-4 rounded-lg flex-1 "
+          >
             <Text className="text-white font-semibold text-center ">
               Log out
             </Text>

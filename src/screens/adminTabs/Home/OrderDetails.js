@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Octicons from "react-native-vector-icons/Octicons";
@@ -30,18 +30,20 @@ import EditOrder from "../../../components/EditOrder";
 const OrderDetails = ({ navigation, route }) => {
   const { item } = route.params;
   const [loading, setLoading] = useState(false);
-  const { token } = useSelector(state => state.token);
+  const { token } = useSelector((state) => state.token);
   const [modalVisible, setModalVisible] = useState(false);
   const [amount, setAmount] = useState();
-  const [payDeliveryCostState , setPayDeliveryCostState] = useState()
+  const [payDeliveryCostState, setPayDeliveryCostState] = useState();
   const [edit, setEdit] = useState();
 
-  const payDeliveryCosts = async () =>{
-    console.log(payDeliveryCostState , "Delivery Payments" , user)
-    await payDeliveryPerson({body : { amount : payDeliveryCostState , userId : itmen._id } , token})
-  setModalVisible(false)
-  }
-
+  const payDeliveryCosts = async () => {
+    console.log(payDeliveryCostState, "Delivery Payments", user);
+    await payDeliveryPerson({
+      body: { amount: payDeliveryCostState, userId: itmen._id },
+      token,
+    });
+    setModalVisible(false);
+  };
 
   const Collect = async () => {
     setModalVisible(false);
@@ -71,8 +73,14 @@ const OrderDetails = ({ navigation, route }) => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="flex-1 bg-white   px-2  py-4">
-
-            <ScrollView className="flex-1 bg-[#F4F4FB] rounded-xl px-4" style={{ elevation: 10 }} contentContainerStyle={{ justifyContent: "space-between" , flex : 1}}>
+            <ScrollView
+              className="flex-1 bg-[#F4F4FB] rounded-xl px-4"
+              style={{ elevation: 10 }}
+              contentContainerStyle={{
+                justifyContent: "space-between",
+                flex: 1,
+              }}
+            >
               <View className="flex-1 f-full justify-between">
                 <View className=" ">
                   <Image
@@ -128,66 +136,82 @@ const OrderDetails = ({ navigation, route }) => {
                   </View>
                   <View className="flex-row gap-2 mt-2">
                     <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
-                      <FontAwesome5 name={"rupee-sign"} size={25} color="#FF7754" />
+                      <FontAwesome5
+                        name={"rupee-sign"}
+                        size={25}
+                        color="#FF7754"
+                      />
                       <View className="border border-slate-500 ml-3  h-full" />
                       <Text className=" ml-4 font-medium text-gray-600">
                         {item.totalAmount ? item.totalAmount : "-"}
                       </Text>
                     </View>
-
                   </View>
-                  {item.itemId && <View className="flex-row gap-3 mt-1">
-                    <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
-                      <MaterialIcons name={"delivery-dining"} size={25} color="#FF7754" />
-                      <View className="border border-slate-500 ml-3  h-full" />
-                      <Text className=" ml-4 font-medium text-gray-600">
-                        {item.itemId.itemName}
-                      </Text>
+                  {item?.userId?.userName && (
+                    <View className="flex-row gap-3 mt-1">
+                      <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
+                        <MaterialIcons
+                          name={"delivery-dining"}
+                          size={25}
+                          color="#FF7754"
+                        />
+                        <View className="border border-slate-500 ml-3  h-full" />
+                        <Text className=" ml-4 font-medium text-gray-600">
+                          {item?.userId?.userName}
+                        </Text>
+                      </View>
                     </View>
-                  </View>}
-                  {item.itemId && <View className="flex-row gap-3 mt-1">
-
-                    <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
-                      <FontAwesome name={"mobile-phone"} size={25} color="#FF7754" />
-                      <View className="border border-slate-500 ml-3  h-full" />
-                      <Text className=" ml-4 font-medium text-gray-600">
-                        {item.itemId.phoneNumber}
-                      </Text>
+                  )}
+                  {item.userId && (
+                    <View className="flex-row gap-3 mt-1">
+                      <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
+                        <FontAwesome
+                          name={"mobile-phone"}
+                          size={25}
+                          color="#FF7754"
+                        />
+                        <View className="border border-slate-500 ml-3  h-full" />
+                        <Text className=" ml-4 font-medium text-gray-600">
+                          {item?.userId?.phoneNumber}
+                        </Text>
+                      </View>
                     </View>
-                  </View>}
-                 
+                  )}
                 </View>
                 {loading && <LoadingModal loading={loading} />}
                 <View className=" mb-4">
-                <View className="flex flex-row gap-3">
-                
-                <Pressable
-                  onPress={() => setModalVisible(true)}
-                  className="bg-[#444262] px-4 py-3 rounded-md mb-3  flex-1"
-                >
-                  <Text className="text-center font-medium text-white">
-                   Edit
-                  </Text>
-                </Pressable>
-                {!item.dispatched &&<Pressable
-                   onPress={() => {
-                    navigation.navigate(navigationStrings.ASSIGNORDER, [item]);
-                             }}
-                  className="bg-[#444262] px-4 py-3 rounded-md mb-3 flex-1"
-                >
-                  <Text className="text-center font-medium text-white">
-                    Assig Order 
-                  </Text>
-                </Pressable>}
-                </View>
-                <Pressable
-                  onPress={() => navigation.goBack()}
-                  className="bg-[#FF7754] px-4 py-3 rounded-md mb-3 "
-                >
-                  <Text className="text-center font-medium text-white">
-                    Back
-                  </Text>
-                </Pressable>
+                  <View className="flex flex-row gap-3">
+                    <Pressable
+                      onPress={() => setModalVisible(true)}
+                      className="bg-[#444262] px-4 py-3 rounded-md mb-3  flex-1"
+                    >
+                      <Text className="text-center font-medium text-white">
+                        Edit
+                      </Text>
+                    </Pressable>
+                    {!item.dispatched && (
+                      <Pressable
+                        onPress={() => {
+                          navigation.navigate(navigationStrings.ASSIGNORDER, [
+                            item,
+                          ]);
+                        }}
+                        className="bg-[#444262] px-4 py-3 rounded-md mb-3 flex-1"
+                      >
+                        <Text className="text-center font-medium text-white">
+                          Assig Order
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
+                  <Pressable
+                    onPress={() => navigation.goBack()}
+                    className="bg-[#FF7754] px-4 py-3 rounded-md mb-3 "
+                  >
+                    <Text className="text-center font-medium text-white">
+                      Back
+                    </Text>
+                  </Pressable>
                 </View>
               </View>
             </ScrollView>
@@ -201,12 +225,10 @@ const OrderDetails = ({ navigation, route }) => {
           modalVisible={modalVisible}
           edit={item}
           setLoading={setLoading}
-          navigation ={navigation}
+          navigation={navigation}
           // getOrders={getOrders}
         />
       )}
-
-
     </>
   );
 };
