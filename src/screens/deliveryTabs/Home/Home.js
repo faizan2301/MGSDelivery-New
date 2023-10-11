@@ -15,6 +15,7 @@ import {
   Pressable,
   View,
   RefreshControl,
+  Modal,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
@@ -37,7 +38,7 @@ import LoadingModal from "./../../../components/LoadingModal";
 import * as Location from "expo-location";
 import CalendarModal from "../../../components/CalendarModal";
 import { formatDate } from "../../../helper/formatDate";
-
+import * as Linking from "expo-linking";
 const Home = (props) => {
   const { navigation } = props;
 
@@ -56,7 +57,8 @@ const Home = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
-
+  const [numbermodalVisible, setNumberModalVisible] = useState(false);
+  const [Numbers, setNumbers] = useState([]);
   const [startDate, setStartDate] = useState(startOfDay);
   const [endDate, setEndDate] = useState(endOfDay);
   const [skip, setSkip] = useState(0);
@@ -91,7 +93,6 @@ const Home = (props) => {
   const getOrdersByDate = async () => {
     setSkip(0);
     dataIsEnded.current = true;
-    console.log("function is runnig", "get order by date");
     setCalendarVisible(false);
     await myOrders({
       body: {
@@ -163,8 +164,8 @@ const Home = (props) => {
   }, [IsError]);
 
   const loadMoreData = async () => {
+    if (items.length % 20 !== 0) return;
     if (isLoading || isLoadingMore) return; // Prevent multiple requests
-    console.log("get inside load more", skip);
     setIsLoadingMore(true); // Set loading flag/ Increase skip by the desired limit
     await getOrders();
     setSkip(skip + 20);
@@ -275,15 +276,19 @@ const Home = (props) => {
                 </View>
               </View>
               <View className="flex-row ">
-                <View
+                <TouchableOpacity
                   style={{ marginBottom: 4 }}
                   className={`flex-row px-5 py-2 rounded-full items-center ${
                     item.isSelected ? "bg-white" : "bg-slate-200/50"
                   }`}
+                  onPress={() => {
+                    console.log("first");
+                    getNumber(item.mobile);
+                  }}
                 >
                   <FontAwesome5 name={"phone"} size={20} color="#FF7754" />
                   <Text className="pl-3">{item.mobile}</Text>
-                </View>
+                </TouchableOpacity>
               </View>
 
               <View className="flex-row ">
@@ -341,7 +346,7 @@ const Home = (props) => {
         </>
       );
     };
-  }, [skip, filterOrder, items]);
+  }, [skip, filterOrder, items, refreshing]);
 
   const renderFilter = useMemo(() => {
     return ({ item }) => {
@@ -417,8 +422,72 @@ const Home = (props) => {
     },
     [calendarVisible]
   );
+  const callCustomer = async (number) => {
+    if (number) {
+      try {
+        Linking.openURL(`tel:${number}`);
+        setNumberModalVisible(false);
+      } catch (error) {
+        console.log("Error", er);
+      }
+    }
+  };
+  const getNumber = async (numbers) => {
+    var array = [];
+    if (numbers.length > 9) {
+      if (numbers.includes(",")) {
+        var tNumbers = await numbers.split(",");
+        for (let index = 0; index < tNumbers.length; index++) {
+          const element = tNumbers[index];
+          if (element.length > 9) {
+            array.push(element);
+          }
+        }
+        setNumbers(array);
+        console.log(tNumbers);
+        setNumberModalVisible(true);
+      } else if (numbers) {
+        console.log(numbers);
+        array.push(numbers);
+        setNumbers(array);
+        setNumberModalVisible(true);
+      }
+    } else {
+      showMessage({ message: "Not valid mobile no", type: "warning" });
+    }
+  };
   return (
     <View className="flex-1 bg-[#F8F8FE] pt-4">
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={numbermodalVisible}
+        style={{ zIndex: 1100 }}
+        onRequestClose={() => {
+          setNumberModalVisible(!numbermodalVisible);
+        }}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            {Numbers.length > 0
+              ? Numbers.map((item, index) => {
+                  return (
+                    <TouchableOpacity
+                      className={`flex-row my-2 p-2  rounded-full items-center border border-black `}
+                      key={index}
+                      onPress={() => {
+                        callCustomer(item);
+                      }}
+                    >
+                      <FontAwesome5 name={"phone"} size={20} color="#FF7754" />
+                      <Text className="text-black mx-2">{item}</Text>
+                    </TouchableOpacity>
+                  );
+                })
+              : null}
+          </View>
+        </View>
+      </Modal>
       <View className="flex-row px-2">
         <TouchableOpacity
           onPress={() => setCalendarVisible(true)}
@@ -519,5 +588,21 @@ export const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 12,
     paddingVertical: 8,
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: "center",
+    flexDirection: "column",
+    justifyContent: "space-around",
+    backgroundColor: "#rgba(0, 0, 0, 0.5)",
+    zIndex: 1000,
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 200,
   },
 });

@@ -129,7 +129,7 @@ const Deliver = ({ navigation, route }) => {
   const confirmDelivery = async () => {
     setModalVisible(false);
     const googleData = await googledistanceApi(state);
-    const distance = googleData.data.routes[0].distanceMeters / 1000 || 4;
+    const distance = googleData.data.routes[0].distanceMeters / 1000 || 0;
 
     if (item.billNo.toLowerCase().startsWith("db")) {
       if (item.credit && item.creditApproved) {

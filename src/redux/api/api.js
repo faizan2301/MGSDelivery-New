@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-const baseUrl = "http://192.168.1.32:4000";
-// const baseUrl = "https://mahaveer.vercel.app/";
+// const baseUrl = "http://192.168.1.32:4000";
+const baseUrl = "https://mahaveer.vercel.app/";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: baseUrl }),
@@ -190,7 +190,20 @@ export const api = createApi({
         };
       },
     }),
-
+    collectCreditAmount: build.mutation({
+      query: (args) => {
+        console.log("collect-credit-amount", args.body);
+        return {
+          url: "collect-credit-amount",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
     customers: build.mutation({
       query: (args) => {
         console.log("all customer", args.body);
@@ -420,7 +433,7 @@ export const {
   useRejectCreditRequestMutation,
   useCustomersMutation,
   useCustomerOrdersMutation,
-
+  useCollectCreditAmountMutation,
   useGetMyOrderMutation,
   useCancelMyOrderMutation,
   usePikedupMutation,
@@ -432,6 +445,7 @@ export const {
   useRefusedToAcceptMutation,
   useFindCreditAuthorizedAdminMutation,
   useSendCreditRequiestMutation,
+
   useTransactionMutation,
   useTransactionpostMutation,
   useGoogledistanceMutation,

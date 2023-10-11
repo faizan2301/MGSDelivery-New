@@ -33,7 +33,6 @@ import CalendarModal from "../../../components/CalendarModal";
 import { formatDate } from "../../../constant/dateYYYYMMDD";
 
 const MyCredits = (props) => {
-
   const currentDate = new Date();
   const startOfDay = new Date(currentDate);
   startOfDay.setHours(0, 0, 0, 0); // Set to 12:00:00 AM
@@ -52,10 +51,10 @@ const MyCredits = (props) => {
 
   const [skip, setSkip] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [endData, setEndData] = useState(true)
+  const [endData, setEndData] = useState(true);
 
- 
-  const [apiCall, {data , isSuccess, isError, isLoading, error }] = useMyCreditOrdersMutation();
+  const [apiCall, { data, isSuccess, isError, isLoading, error }] =
+    useMyCreditOrdersMutation();
   const focused = useIsFocused();
   const isPermissionGranted = useSelector(
     (state) => state.cameraPermission.isGranted
@@ -70,23 +69,25 @@ const MyCredits = (props) => {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    setSkip(0)
-    setItems([])
+    setSkip(0);
+    setItems([]);
     getOrders();
     setRefreshing(false);
   }, []);
 
   const textBoxWidth = 0.3;
-  
+
   const renderItem = useCallback(({ item, index }) => {
+    console.log(item);
     return (
       <>
         <TouchableOpacity
           onPress={() => {
             navigation.navigate(navigationStrings.ADMINAPPROVECREDIT, { item });
           }}
-          className={` my-2 mx-4 w-fit p-2 rounded-lg h-60 ${item.isSelected ? "  bg-orange-100" : " bg-white"
-            }`}
+          className={` my-2 mx-4 w-fit p-2 rounded-lg h-60 ${
+            item.isSelected ? "  bg-orange-100" : " bg-white"
+          }`}
           key={index}
           style={{
             shadowColor: "#000",
@@ -94,23 +95,34 @@ const MyCredits = (props) => {
             elevation: 10,
           }}
         >
-          <View className="flex-row ">
+          <View className="flex-row justify-between">
             <View
               style={{ marginBottom: 4 }}
-              className={`flex-row px-5 py-2 rounded-full items-center ${item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
+              className={`flex-row px-5 py-2 rounded-full items-center ${
+                item.isSelected ? "bg-white" : "bg-slate-200/50"
+              }`}
             >
               <FontAwesome name={"user"} size={20} color="#FF7754" />
               <Text className="pl-3 font-semibold text-[#444262]">
                 {item.name}
               </Text>
             </View>
+            <View className=" items-center justify-center mr-3">
+              <View
+                className={`w-5 h-5 rounded-full ${
+                  item.credit && item.creditApproved
+                    ? "bg-green-600"
+                    : "bg-red-600"
+                }`}
+              ></View>
+            </View>
           </View>
           <View className="flex-row ">
             <View
               style={{ marginBottom: 4 }}
-              className={`flex-row px-5 py-2 rounded-full items-center ${item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
+              className={`flex-row px-5 py-2 rounded-full items-center ${
+                item.isSelected ? "bg-white" : "bg-slate-200/50"
+              }`}
             >
               <FontAwesome5 name={"phone"} size={20} color="#FF7754" />
               <Text className="pl-3">{item.mobile}</Text>
@@ -120,24 +132,27 @@ const MyCredits = (props) => {
           <View className="flex-row  gap-2">
             <View
               style={{ marginBottom: 4 }}
-              className={`flex-row px-5 py-2 rounded-full items-center ${item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
+              className={`flex-row px-5 py-2 rounded-full items-center ${
+                item.isSelected ? "bg-white" : "bg-slate-200/50"
+              }`}
             >
               <Entypo name={"clipboard"} size={20} color="#FF7754" />
               <Text className="pl-3">{item.billNo}</Text>
             </View>
             <View
               style={{ marginBottom: 4 }}
-              className={`flex-row px-5 py-2 rounded-full items-center ${item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
+              className={`flex-row px-5 py-2 rounded-full items-center ${
+                item.isSelected ? "bg-white" : "bg-slate-200/50"
+              }`}
             >
               <FontAwesome5 name={"shopping-bag"} size={20} color="#FF7754" />
               <Text className="pl-3">{item.totalBags}</Text>
             </View>
             <View
               style={{ marginBottom: 4 }}
-              className={`flex-row px-5 py-2 rounded-full items-center ${item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
+              className={`flex-row px-5 py-2 rounded-full items-center ${
+                item.isSelected ? "bg-white" : "bg-slate-200/50"
+              }`}
             >
               <FontAwesome5 name={"rupee-sign"} size={20} color="#FF7754" />
               <Text className="pl-3">
@@ -150,8 +165,9 @@ const MyCredits = (props) => {
           <View className=" flex-1 ">
             <View
               style={{ marginBottom: 4 }}
-              className={`flex-row px-5 py-2 rounded-full items-center ${item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
+              className={`flex-row px-5 py-2 rounded-full items-center ${
+                item.isSelected ? "bg-white" : "bg-slate-200/50"
+              }`}
             >
               <Octicons name={"home"} size={20} color="#FF7754" />
               <Text className="pl-3  text-[#444262]">{item.address}</Text>
@@ -160,7 +176,7 @@ const MyCredits = (props) => {
         </TouchableOpacity>
       </>
     );
-  }) 
+  });
 
   const getOrders = async (startDate, endDate) => {
     if (startDate) {
@@ -179,68 +195,57 @@ const MyCredits = (props) => {
       START_DATE: formatDate(startDate && formatDate(startDate)),
     });
     setCalendarVisible(false);
-    console.log(skip , "INside gte")
+    console.log(skip, "INside gte");
     if (userData.role === "Admin") {
       response = await apiCall({
-        body: { END_DATE: endDate, START_DATE: startDate , skip , orderStatus : "all" },
+        body: {
+          END_DATE: endDate,
+          START_DATE: startDate,
+          skip,
+          orderStatus: "all",
+        },
         token,
       });
       setSkip(skip + 20);
     }
-
   };
 
   const loadMoreData = async () => {
     if (isLoading || isLoadingMore) return; // Prevent multiple requests
     setIsLoadingMore(true); // Set loading flag/ Increase skip by the desired limit
     await getOrders();
-    setSkip(skip + 20)
+    setSkip(skip + 20);
     setIsLoadingMore(false); // Clear loading flag
   };
 
   useEffect(() => {
     if (isLoading || isLoadingMore) return;
-    getOrders()
+    getOrders();
   }, [0]);
 
-
-useEffect(()=>{
-  if(isSuccess){
-
-    if (data.data) {
-      if (data.data.length === 0) {
-        setEndData(false)
+  useEffect(() => {
+    if (isSuccess) {
+      if (data.data) {
+        if (data.data.length === 0) {
+          setEndData(false);
+        }
+        setItems((prevData) => [...prevData, ...data.data]);
       }
-      setItems((prevData) => [...prevData, ...data.data]);
     }
-  }
-},[isSuccess])
+  }, [isSuccess]);
 
-useEffect(()=>{
-  if(isError){
-    if(error.data){
-      showMessage({message : error.data.message , type : "danger"})
-    }else{
-      showMessage({message : error.data.message , type : "danger"}) 
+  useEffect(() => {
+    if (isError) {
+      if (error.data) {
+        showMessage({ message: error.data.message, type: "danger" });
+      } else {
+        showMessage({ message: error.data.message, type: "danger" });
+      }
     }
-  }
-},[isError])
-
-
-
-
-
-
-
-
-
-
-
+  }, [isError]);
 
   return (
     <View className="flex-1 bg-[#F8F8FE] ">
-
-    
       {
         <FlatList
           data={isSelectedAdded}
@@ -257,10 +262,8 @@ useEffect(()=>{
           onEndReachedThreshold={0.5}
         />
       }
-      
-      
 
-      { isLoading && skip === 0 && <LoadingModal loading={isLoading} />}
+      {isLoading && skip === 0 && <LoadingModal loading={isLoading} />}
       {/* {calendarVisible && (
         <CalendarModal
           setCalendarVisible={setCalendarVisible}

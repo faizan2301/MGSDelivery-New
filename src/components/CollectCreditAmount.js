@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,15 +8,59 @@ import {
   Image,
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-
+import { useCollectCreditAmountMutation } from "../redux/api/api";
+import { useSelector } from "react-redux";
+import { showMessage } from "react-native-flash-message";
 function CollectCreditAmount({
   modalVisible,
   setModalVisible,
   item,
-  collectCreditAmount,
+  navigation,
 }) {
-  const [collectedAmount, setCollectedAmount] = useState(false);
-
+  const [collectedAmount, setCollectedAmount] = useState();
+  const { token } = useSelector((state) => state.token);
+  const [collectAmount, { data, isError, isLoading, isSuccess, error }] =
+    useCollectCreditAmountMutation();
+  useEffect(() => {
+    console.log("item", item);
+  }, [0]);
+  const collectAmountCall = async () => {
+    if (collectedAmount) {
+      if (collectedAmount > item.creditAmount) {
+        setModalVisible(false);
+        showMessage({
+          message: "Collect amount can't be greater than credited amount",
+          type: "warning",
+        });
+      } else {
+        var body = {
+          customerId: item.customerId,
+          amountRecived: collectedAmount,
+        };
+        var args = { body, token };
+        var response = await collectAmount(args);
+        console.log(response);
+        if (response?.data?.success) {
+          setModalVisible(false);
+          navigation.goBack();
+        } else {
+          setModalVisible(false);
+          const errorMessage =
+            response?.error?.data?.message || "Something went wrong";
+          showMessage({
+            message: errorMessage,
+            type: "danger",
+          });
+        }
+      }
+    } else {
+      setModalVisible(false);
+      showMessage({
+        message: "Please enter amount to be collected.",
+        type: "warning",
+      });
+    }
+  };
   return (
     <View className="flex-1  ">
       <Modal
@@ -26,6 +70,7 @@ function CollectCreditAmount({
         onRequestClose={() => {
           setModalVisible(false);
         }}
+        style={{ zIndex: 1000, alignSelf: "center", flex: 1 }}
       >
         <View className="flex-1 bg-black/50 ">
           {/* <Image /> */}
@@ -74,7 +119,7 @@ function CollectCreditAmount({
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => collectCreditAmount(collectedAmount)}
+                  onPress={collectAmountCall}
                   className="bg-[#444262] flex-1 py-3 rounded-md"
                 >
                   <Text className="text-white font-semibold text-center">

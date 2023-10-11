@@ -45,6 +45,7 @@ const Home = (props) => {
   const [items, setItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [Numbers, setNumbers] = useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
@@ -58,7 +59,6 @@ const Home = (props) => {
   const [startDate, setStartDate] = useState(startOfDay);
   const [endDate, setEndDate] = useState(endOfDay);
   const [filterOrder, setFilterOrder] = useState("pending");
-  const [Numbers, setNumbers] = useState([]);
 
   const startDateMemo = useMemo(() => startDate, [startDate]); // Empty dependency array
   const endDateMemo = useMemo(() => endDate, [endDate]);
@@ -234,7 +234,7 @@ const Home = (props) => {
         </>
       );
     };
-  }, [skipMemo, filterMemo]);
+  }, [skipMemo, filterMemo, selectedItems]);
 
   const renderFilter = useMemo(() => {
     return ({ item }) => {
@@ -274,6 +274,7 @@ const Home = (props) => {
   }, [filterMemo]);
 
   const getOrders = async (startDate, endDate, skipcheck) => {
+    if (items.length % 20 !== 0) return;
     setCalendarVisible(false);
     if (isLoading || isLoadingMore) return;
     if (!myRef.current) return;
@@ -290,6 +291,7 @@ const Home = (props) => {
   };
 
   const loadMoreData = async () => {
+    if (items.length % 20 !== 0) return;
     setskipno(skipno + 20);
     if (isLoading || isLoadingMore) return; // Prevent multiple requests
     setIsLoadingMore(true); // Set loading flag/ Increase skip by the desired limit

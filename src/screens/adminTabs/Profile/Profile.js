@@ -6,7 +6,7 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import navigationStrings from "../../../constant/navigationStrings";
 import { useMeMutation } from "../../../redux/api/api";
 import { saveUserData } from "../../../redux/slice/authSlice";
-import { saveTokentoAsync } from "../../../common/AsyncStorageFunctions";
+import { showMessage } from "react-native-flash-message";
 
 const Profile = ({ navigation }) => {
   const { userData } = useSelector((state) => state.user);
@@ -14,21 +14,31 @@ const Profile = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
-  const [me] = useMeMutation();
-
-  const getUserInfo = async () => {
-    const response = await me(token);
-    if (response.data) {
-      dispatch(saveUserData(response.data.data));
-    }
-  };
+  const [me, { data, isSuccess, error, isError, isLoading }] = useMeMutation();
 
   useEffect(() => {
-    getUserInfo();
+    me(token);
   }, []);
 
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(saveUserData(data.data));
+    }
+  }, [isSuccess]);
+  useEffect(() => {
+    if (isError) {
+      if (error.data) {
+        showMessage({ message: error.data.message, type: "danger" });
+      } else {
+        showMessage({
+          message: "Somthing went wrong while fetching user information",
+          type: "danger",
+        });
+      }
+    }
+  }, [isError]);
+
   const logOut = async () => {
-    await saveTokentoAsync("");
     navigation.navigate(navigationStrings.LOGINSCREEN);
   };
   return (
