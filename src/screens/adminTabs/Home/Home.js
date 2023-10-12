@@ -138,13 +138,13 @@ const Home = (props) => {
             }}
             // onLongPress={()=> navigation.navigate(navigationStrings.ADMINEDITORDER,{item })}
             onPress={() =>{
-              console.log(filterMemo , ">>>><<<<")
+          
               filterMemo === "pending"
                 ? onSelect(item)
                 : navigation.navigate(navigationStrings.ADMINORDERDETAILS, {
                     item,
                   })
-            }
+            }}
             className={` my-2 mx-4 w-fit p-2 rounded-lg min-h-60 ${
               item.isSelected ? "  bg-orange-100" : " bg-white"
             }`}
