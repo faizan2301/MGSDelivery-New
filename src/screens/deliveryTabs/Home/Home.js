@@ -133,7 +133,6 @@ const Home = (props) => {
     if (isSuccess) {
       if (isLoading || isLoadingMore) return;
       if (isSuccess) {
-
         if (data.data.length === 0) {
           dataIsEnded.current = false;
         }
@@ -165,7 +164,7 @@ const Home = (props) => {
   }, [IsError]);
 
   const loadMoreData = async () => {
-    if(!dataIsEnded) return
+    if (!dataIsEnded) return;
     if (items.length % 20 !== 0) return;
     if (isLoading || isLoadingMore) return; // Prevent multiple requests
     setIsLoadingMore(true); // Set loading flag/ Increase skip by the desired limit
@@ -247,7 +246,7 @@ const Home = (props) => {
                   ? onSelect(item)
                   : navigation.navigate(navigationStrings.DELIVER, { item });
               }}
-              className={` m-3 p-2 rounded-lg  mx-4 shadow-xl h-60 overflow-auto shadow-black  bg-white  ${
+              className={` m-3 p-2 rounded-lg  mx-4 shadow-xl min-h-60  overflow-auto shadow-black  bg-white  ${
                 item.isSelected ? "  bg-orange-100" : " "
               }`}
               key={index}
