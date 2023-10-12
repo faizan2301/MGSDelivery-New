@@ -144,7 +144,7 @@ const Home = (props) => {
                     item,
                   })
             }
-            className={` my-2 mx-4 w-fit p-2 rounded-lg h-60 ${
+            className={` my-2 mx-4 w-fit p-2 rounded-lg min-h-60 ${
               item.isSelected ? "  bg-orange-100" : " bg-white"
             }`}
             // onPress={() =>{ item.dispatched ?  navigation.navigate(navigationStrings.DELIVER, { item }) : onSelect(item) }
@@ -234,7 +234,7 @@ const Home = (props) => {
         </>
       );
     };
-  }, [skipMemo, filterMemo, selectedItems]);
+  }, [skipMemo, filterMemo, selectedItems, items]);
 
   const renderFilter = useMemo(() => {
     return ({ item }) => {
@@ -309,7 +309,7 @@ const Home = (props) => {
   };
 
   useEffect(() => {
-    setCalendarVisible(false)
+    setCalendarVisible(false);
     if (isLoading || isLoadingMore) return;
     if (focused) {
       setItems([]);
@@ -332,7 +332,7 @@ const Home = (props) => {
       },
       token,
     });
-  }, [filterMemo, endDateMemo , focused]);
+  }, [filterMemo, endDateMemo, focused]);
 
   useEffect(() => {
     if (isLoading || isLoadingMore) return;
@@ -345,7 +345,7 @@ const Home = (props) => {
       },
       token,
     });
-  }, [filterMemo, endDateMemo ]);
+  }, [filterMemo, endDateMemo]);
 
   useEffect(() => {
     if (isLoading || isLoadingMore) return;
