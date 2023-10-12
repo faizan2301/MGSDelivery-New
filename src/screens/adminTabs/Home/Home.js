@@ -137,13 +137,14 @@ const Home = (props) => {
               });
             }}
             // onLongPress={()=> navigation.navigate(navigationStrings.ADMINEDITORDER,{item })}
-            onPress={() =>
-              filterOrder === "pending"
+            onPress={() =>{
+              console.log(filterMemo , ">>>><<<<")
+              filterMemo === "pending"
                 ? onSelect(item)
                 : navigation.navigate(navigationStrings.ADMINORDERDETAILS, {
                     item,
                   })
-            }
+            }}
             className={` my-2 mx-4 w-fit p-2 rounded-lg h-60 ${
               item.isSelected ? "  bg-orange-100" : " bg-white"
             }`}
@@ -234,7 +235,7 @@ const Home = (props) => {
         </>
       );
     };
-  }, [skipMemo, filterMemo, selectedItems]);
+  }, [skipMemo, filterMemo, selectedItems , items]);
 
   const renderFilter = useMemo(() => {
     return ({ item }) => {
@@ -289,6 +290,7 @@ const Home = (props) => {
     });
     setskipno(skipno + 20);
   };
+
 
   const loadMoreData = async () => {
     if (items.length % 20 !== 0) return;
@@ -545,7 +547,7 @@ const Home = (props) => {
           onEndReachedThreshold={0.5}
         />
       }
-      {selectedItems.length > 0 && userData.role === "Admin" ? (
+      {selectedItems.length > 0 && userData.role === "Admin" && filterMemo === "pending" ? (
         <TouchableOpacity
           onPress={assign}
           className="flex justify-center items-center w-16 h-16 z-30 rounded-full absolute bottom-5 right-5 bg-[#444262]"
