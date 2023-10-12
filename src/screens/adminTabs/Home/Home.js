@@ -274,8 +274,8 @@ const Home = (props) => {
   }, [filterMemo]);
 
   const getOrders = async (startDate, endDate, skipcheck) => {
-    if (items.length % 20 !== 0) return;
     setCalendarVisible(false);
+    if (items.length % 20 !== 0) return;
     if (isLoading || isLoadingMore) return;
     if (!myRef.current) return;
     const response = await apiCall({
@@ -309,6 +309,7 @@ const Home = (props) => {
   };
 
   useEffect(() => {
+    setCalendarVisible(false)
     if (isLoading || isLoadingMore) return;
     if (focused) {
       setItems([]);
@@ -331,7 +332,7 @@ const Home = (props) => {
       },
       token,
     });
-  }, [filterMemo, endDateMemo]);
+  }, [filterMemo, endDateMemo , focused]);
 
   useEffect(() => {
     if (isLoading || isLoadingMore) return;
@@ -344,7 +345,7 @@ const Home = (props) => {
       },
       token,
     });
-  }, [filterMemo, endDateMemo]);
+  }, [filterMemo, endDateMemo ]);
 
   useEffect(() => {
     if (isLoading || isLoadingMore) return;
@@ -557,7 +558,7 @@ const Home = (props) => {
         </TouchableOpacity>
       ) : null}
 
-      {isLoading && <LoadingModal loading={isLoading} />}
+      {isLoading && skipMemo === 0 && <LoadingModal loading={isLoading} />}
       {calendarVisible && (
         <CalendarModal
           setCalendarVisible={setCalendarVisible}

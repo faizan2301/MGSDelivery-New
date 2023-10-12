@@ -133,7 +133,8 @@ const Home = (props) => {
     if (isSuccess) {
       if (isLoading || isLoadingMore) return;
       if (isSuccess) {
-        if (data.data.length < 0) {
+
+        if (data.data.length === 0) {
           dataIsEnded.current = false;
         }
         // setHistory(data.data);
@@ -164,6 +165,7 @@ const Home = (props) => {
   }, [IsError]);
 
   const loadMoreData = async () => {
+    if(!dataIsEnded) return
     if (items.length % 20 !== 0) return;
     if (isLoading || isLoadingMore) return; // Prevent multiple requests
     setIsLoadingMore(true); // Set loading flag/ Increase skip by the desired limit
