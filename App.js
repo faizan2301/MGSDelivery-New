@@ -50,7 +50,7 @@ const App = () => {
       <SafeAreaView className="flex-1 bg-white">
         <Routes />
         <StatusBar style="auto" />
-        <FlashMessage position="bottom" />
+        <FlashMessage position="center" />
       </SafeAreaView>
     </Provider>
   );
