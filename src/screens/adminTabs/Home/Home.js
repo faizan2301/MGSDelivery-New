@@ -120,6 +120,10 @@ const Home = (props) => {
 
   const renderItem = useMemo(() => {
     return ({ item, index }) => {
+      const calculatedAmount =
+        item.paid !== undefined
+          ? Math.max(item.totalAmount - item.paid, 0)
+          : item.totalAmount;
       return (
         <>
           <TouchableOpacity
@@ -213,9 +217,10 @@ const Home = (props) => {
               >
                 <FontAwesome5 name={"rupee-sign"} size={20} color="#FF7754" />
                 <Text className="pl-3">
-                  {item.totalAmount - item.paid < 0
+                  {/* {item.totalAmount - item.paid < 0
                     ? 0
-                    : item.totalAmount - item.paid}
+                    : item.totalAmount - item.paid} */}
+                  {calculatedAmount}
                 </Text>
               </View>
             </View>

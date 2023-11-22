@@ -22,20 +22,21 @@ function EditOrder({
   setLoading,
   navigation,
 }) {
-  const { name, mobile, address } = edit;
-  const [newData, setNewData] = useState({ name, mobile, address });
+  const { name, mobile, address, totalBags } = edit;
+  const [newData, setNewData] = useState({ name, mobile, address, totalBags });
   const { token } = useSelector((state) => state.token);
 
   const [editInfo] = useEditOrderInfoMutation();
   const EditOrderDetails = async () => {
     setModalVisible(false);
     setLoading(true);
-
+    console.log("totalBags", newData.totalBags);
     const response = await editInfo({
       body: {
         id: edit._id,
         newAddress: newData.address,
         newPhoneNumber: newData.mobile,
+        totalBags: newData.totalBags,
       },
       token,
     });
@@ -73,6 +74,19 @@ function EditOrder({
                 <Text className=" ml-4 font-medium text-gray-600">
                   {newData?.name}
                 </Text>
+              </View>
+              <View className="flex-row mt-3 px-4 py-3 rounded-md border items-end bg-slate-100 focus:border-2 focus:border-orange-400">
+                <FontAwesome name={"shopping-bag"} size={25} color="#FF7754" />
+                <View className="border border-slate-500 ml-3  h-full" />
+                <TextInput
+                  className="px-3 "
+                  keyboardType="default"
+                  placeholder="Enter total bags"
+                  value={`${newData.totalBags}`}
+                  onChangeText={(text) =>
+                    setNewData({ ...newData, totalBags: text })
+                  }
+                />
               </View>
               <View className="flex-row mt-3 px-4 py-3 rounded-md border items-end bg-slate-100 focus:border-2 focus:border-orange-400">
                 <FontAwesome5 name={"phone"} size={20} color="#FF7754" />

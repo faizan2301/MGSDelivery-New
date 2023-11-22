@@ -199,7 +199,7 @@ const OrderDetails = ({ navigation, route }) => {
                         className="bg-[#444262] px-4 py-3 rounded-md mb-3 flex-1"
                       >
                         <Text className="text-center font-medium text-white">
-                          Assig Order
+                          Assign Order
                         </Text>
                       </Pressable>
                     )}
