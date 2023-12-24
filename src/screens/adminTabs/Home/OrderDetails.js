@@ -71,152 +71,143 @@ const OrderDetails = ({ navigation, route }) => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1, paddingBottom: 20 }}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 bg-white   px-2  py-4">
-            <ScrollView
-              className="flex-1 bg-[#F4F4FB] rounded-xl px-4"
-              style={{ elevation: 10 }}
-              contentContainerStyle={{
-                justifyContent: "space-between",
-                flex: 1,
-              }}
-            >
-              <View className="flex-1 f-full justify-between">
-                <View className=" ">
-                  <Image
-                    source={imageConstant.invoice}
-                    className="w-20 h-20 self-center mt-4"
-                    style={{ tintColor: "#444262" }}
-                  />
-                  <Text className="text-center text-2xl font-light border-b my-2 pb-2">
-                    * Mahaveer Ghr Sansar *
+        {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          
+        </TouchableWithoutFeedback> */}
+        <ScrollView
+          contentContainerStyle={{
+            backgroundColor: "#F4F4FB",
+            padding: 10,
+          }}
+        >
+          <View className="flex-1 f-full justify-between">
+            <View className=" ">
+              <Image
+                source={imageConstant.invoice}
+                className="w-20 h-20 self-center mt-4"
+                style={{ tintColor: "#444262" }}
+              />
+              <Text className="text-center text-2xl font-light border-b my-2 pb-2">
+                * Mahaveer Ghr Sansar *
+              </Text>
+              <View className="flex-row mt-3 px-4 py-3 rounded-md border items-end">
+                <FontAwesome name={"user"} size={25} color="#444262" />
+                <View className="border border-slate-500 ml-3  h-full" />
+                <Text className=" ml-4 font-medium text-gray-600">
+                  {item.name}
+                </Text>
+              </View>
+              <View className="flex-row mt-3 px-4 py-3 rounded-md border items-end">
+                <FontAwesome5 name={"phone"} size={25} color="#444262" />
+                <View className="border border-slate-500 ml-3  h-full" />
+                <Text className=" ml-4 font-medium text-gray-600">
+                  {item.mobile}
+                </Text>
+              </View>
+              <View className="flex-row mt-3 px-4 py-3 rounded-md border items-center">
+                <Octicons name={"home"} size={25} color="#444262" />
+                <View className="border border-slate-500 ml-3  h-full " />
+                <Text className=" mx12-4 font-medium text-gray-600">
+                  {item.address}
+                </Text>
+              </View>
+
+              <View className="flex-row gap-3 mt-1">
+                <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-end">
+                  <Entypo name={"clipboard"} size={25} color="#444262" />
+                  <View className="border border-slate-500 ml-3  h-full" />
+                  <Text className=" ml-4 font-medium text-gray-600">
+                    {item.billNo}
                   </Text>
-                  <View className="flex-row mt-3 px-4 py-3 rounded-md border items-end">
-                    <FontAwesome name={"user"} size={25} color="#444262" />
-                    <View className="border border-slate-500 ml-3  h-full" />
-                    <Text className=" ml-4 font-medium text-gray-600">
-                      {item.name}
-                    </Text>
-                  </View>
-                  <View className="flex-row mt-3 px-4 py-3 rounded-md border items-end">
-                    <FontAwesome5 name={"phone"} size={25} color="#444262" />
-                    <View className="border border-slate-500 ml-3  h-full" />
-                    <Text className=" ml-4 font-medium text-gray-600">
-                      {item.mobile}
-                    </Text>
-                  </View>
-                  <View className="flex-row mt-3 px-4 py-3 rounded-md border items-end">
-                    <Octicons name={"home"} size={25} color="#444262" />
-                    <View className="border border-slate-500 ml-3  h-full" />
-                    <Text className=" ml-4 font-medium text-gray-600">
-                      {item.address}
-                    </Text>
-                  </View>
-
-                  <View className="flex-row gap-3 mt-1">
-                    <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-end">
-                      <Entypo name={"clipboard"} size={25} color="#444262" />
-                      <View className="border border-slate-500 ml-3  h-full" />
-                      <Text className=" ml-4 font-medium text-gray-600">
-                        {item.billNo}
-                      </Text>
-                    </View>
-
-                    <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-end">
-                      <FontAwesome5
-                        name={"shopping-bag"}
-                        size={25}
-                        color="#444262"
-                      />
-                      <View className="border border-slate-500 ml-3  h-full" />
-                      <Text className=" ml-4 font-medium text-gray-600">
-                        {item.totalBags}
-                      </Text>
-                    </View>
-                  </View>
-                  <View className="flex-row gap-2 mt-2">
-                    <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
-                      <FontAwesome5
-                        name={"rupee-sign"}
-                        size={25}
-                        color="#FF7754"
-                      />
-                      <View className="border border-slate-500 ml-3  h-full" />
-                      <Text className=" ml-4 font-medium text-gray-600">
-                        {item.totalAmount ? item.totalAmount : "-"}
-                      </Text>
-                    </View>
-                  </View>
-                  {item?.userId?.userName && (
-                    <View className="flex-row gap-3 mt-1">
-                      <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
-                        <MaterialIcons
-                          name={"delivery-dining"}
-                          size={25}
-                          color="#FF7754"
-                        />
-                        <View className="border border-slate-500 ml-3  h-full" />
-                        <Text className=" ml-4 font-medium text-gray-600">
-                          {item?.userId?.userName}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                  {item.userId && (
-                    <View className="flex-row gap-3 mt-1">
-                      <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
-                        <FontAwesome
-                          name={"mobile-phone"}
-                          size={25}
-                          color="#FF7754"
-                        />
-                        <View className="border border-slate-500 ml-3  h-full" />
-                        <Text className=" ml-4 font-medium text-gray-600">
-                          {item?.userId?.phoneNumber}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
                 </View>
-                {loading && <LoadingModal loading={loading} />}
-                <View className=" mb-4">
-                  <View className="flex flex-row gap-3">
-                    <Pressable
-                      onPress={() => setModalVisible(true)}
-                      className="bg-[#444262] px-4 py-3 rounded-md mb-3  flex-1"
-                    >
-                      <Text className="text-center font-medium text-white">
-                        Edit
-                      </Text>
-                    </Pressable>
-                    {!item.dispatched && (
-                      <Pressable
-                        onPress={() => {
-                          navigation.navigate(navigationStrings.ASSIGNORDER, [
-                            item,
-                          ]);
-                        }}
-                        className="bg-[#444262] px-4 py-3 rounded-md mb-3 flex-1"
-                      >
-                        <Text className="text-center font-medium text-white">
-                          Assign Order
-                        </Text>
-                      </Pressable>
-                    )}
-                  </View>
-                  <Pressable
-                    onPress={() => navigation.goBack()}
-                    className="bg-[#FF7754] px-4 py-3 rounded-md mb-3 "
-                  >
-                    <Text className="text-center font-medium text-white">
-                      Back
-                    </Text>
-                  </Pressable>
+
+                <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-end">
+                  <FontAwesome5
+                    name={"shopping-bag"}
+                    size={25}
+                    color="#444262"
+                  />
+                  <View className="border border-slate-500 ml-3  h-full" />
+                  <Text className=" ml-4 font-medium text-gray-600">
+                    {item.totalBags}
+                  </Text>
                 </View>
               </View>
-            </ScrollView>
+              <View className="flex-row gap-2 mt-2">
+                <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
+                  <FontAwesome5 name={"rupee-sign"} size={25} color="#FF7754" />
+                  <View className="border border-slate-500 ml-3  h-full" />
+                  <Text className=" ml-4 font-medium text-gray-600">
+                    {item.totalAmount ? item.totalAmount : "-"}
+                  </Text>
+                </View>
+              </View>
+              {item?.userId?.userName && (
+                <View className="flex-row gap-3 mt-1">
+                  <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
+                    <MaterialIcons
+                      name={"delivery-dining"}
+                      size={25}
+                      color="#FF7754"
+                    />
+                    <View className="border border-slate-500 ml-3  h-full" />
+                    <Text className=" ml-4 font-medium text-gray-600">
+                      {item?.userId?.userName}
+                    </Text>
+                  </View>
+                </View>
+              )}
+              {item.userId && (
+                <View className="flex-row gap-3 mt-1">
+                  <View className="flex-row flex-1 mt-3 px-4 py-3 rounded-md border items-center  ">
+                    <FontAwesome
+                      name={"mobile-phone"}
+                      size={25}
+                      color="#FF7754"
+                    />
+                    <View className="border border-slate-500 ml-3  h-full" />
+                    <Text className=" ml-4 font-medium text-gray-600">
+                      {item?.userId?.phoneNumber}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </View>
+            {loading && <LoadingModal loading={loading} />}
+            <View className=" mb-4">
+              <View className="flex flex-row gap-3 mt-4">
+                <Pressable
+                  onPress={() => setModalVisible(true)}
+                  className="bg-[#444262] px-4 py-3 rounded-md my-3  flex-1"
+                >
+                  <Text className="text-center font-medium text-white">
+                    Edit
+                  </Text>
+                </Pressable>
+                {!item.dispatched && (
+                  <Pressable
+                    onPress={() => {
+                      navigation.navigate(navigationStrings.ASSIGNORDER, [
+                        item,
+                      ]);
+                    }}
+                    className="bg-[#444262] px-4 py-3 rounded-md mb-3 flex-1"
+                  >
+                    <Text className="text-center font-medium text-white">
+                      Assign Order
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+              <Pressable
+                onPress={() => navigation.goBack()}
+                className="bg-[#FF7754] px-4 py-3 rounded-md mb-3 "
+              >
+                <Text className="text-center font-medium text-white">Back</Text>
+              </Pressable>
+            </View>
           </View>
-        </TouchableWithoutFeedback>
+        </ScrollView>
       </KeyboardAvoidingView>
 
       {modalVisible && (

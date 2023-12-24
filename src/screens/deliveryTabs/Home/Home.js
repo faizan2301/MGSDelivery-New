@@ -90,7 +90,9 @@ const Home = (props) => {
   const { token } = useSelector((state) => state.token);
   const { userData } = useSelector((state) => state.user);
 
-  const getOrdersByDate = async () => {
+  const getOrdersByDate = async (filter) => {
+    var filterStatus = filter == "" ? filterMemo : filter;
+
     setSkip(0);
     dataIsEnded.current = true;
     setCalendarVisible(false);
@@ -99,7 +101,7 @@ const Home = (props) => {
         END_DATE: endDateMemo,
         START_DATE: startDateMemo,
         skip: skipMemo,
-        orderStatus: filterMemo,
+        orderStatus: filterStatus,
       },
       token,
     });
@@ -283,7 +285,6 @@ const Home = (props) => {
                     item.isSelected ? "bg-white" : "bg-slate-200/50"
                   }`}
                   onPress={() => {
-                    console.log("first");
                     getNumber(item.mobile);
                   }}
                 >
@@ -356,7 +357,7 @@ const Home = (props) => {
           onPress={() => {
             setFilterOrder(item.status);
             setItems([]);
-            setSkip(0);
+            getOrdersByDate();
           }}
           className={` h-12 flex-row items-center justify-center  rounded-full py-2 w-36
        m-2 ${filterOrder === item.status ? "bg-[#444262]" : "bg-[#C1C0C8]"}`}
@@ -373,9 +374,10 @@ const Home = (props) => {
         !item.admin && (
           <Pressable
             onPress={() => {
-              setFilterOrder(item.status);
               setItems([]);
               setSkip(0);
+              setFilterOrder(item.status);
+              getOrdersByDate(item.status);
             }}
             className={` h-12 flex-row items-center justify-center  rounded-full py-2 w-36
        m-2 ${filterOrder === item.status ? "bg-[#444262]" : "bg-[#C1C0C8]"}`}
@@ -445,10 +447,8 @@ const Home = (props) => {
           }
         }
         setNumbers(array);
-        console.log(tNumbers);
         setNumberModalVisible(true);
       } else if (numbers) {
-        console.log(numbers);
         array.push(numbers);
         setNumbers(array);
         setNumberModalVisible(true);
