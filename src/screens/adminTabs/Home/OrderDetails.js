@@ -107,7 +107,7 @@ const OrderDetails = ({ navigation, route }) => {
               <View className="flex-row mt-3 px-4 py-3 rounded-md border items-center">
                 <Octicons name={"home"} size={25} color="#444262" />
                 <View className="border border-slate-500 ml-3  h-full " />
-                <Text className=" mx12-4 font-medium text-gray-600">
+                <Text className=" mx-4 font-medium text-gray-600">
                   {item.address}
                 </Text>
               </View>

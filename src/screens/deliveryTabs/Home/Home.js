@@ -92,10 +92,11 @@ const Home = (props) => {
 
   const getOrdersByDate = async (filter) => {
     var filterStatus = filter == "" ? filterMemo : filter;
-
+    setItems([]);
     setSkip(0);
     dataIsEnded.current = true;
     setCalendarVisible(false);
+
     await myOrders({
       body: {
         END_DATE: endDateMemo,
@@ -110,6 +111,10 @@ const Home = (props) => {
   const getOrders = async () => {
     setCalendarVisible(false);
 
+    if (skipMemo == 0) {
+      console.log(skipMemo);
+      setItems([]);
+    }
     if (!dataIsEnded.current) return;
     await myOrders({
       body: {
