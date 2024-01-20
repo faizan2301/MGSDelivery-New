@@ -148,7 +148,7 @@ const Home = (props) => {
                     item,
                   })
             }
-            className={` my-2 mx-4 w-fit p-2 rounded-lg min-h-60 ${
+            className={` my-2 mx-4 w-fit p-2 rounded-lg min-h-fit  ${
               item.isSelected ? "  bg-orange-100" : " bg-white"
             }`}
             // onPress={() =>{ item.dispatched ?  navigation.navigate(navigationStrings.DELIVER, { item }) : onSelect(item) }
@@ -189,7 +189,19 @@ const Home = (props) => {
                 <Text className="pl-3">{item.mobile}</Text>
               </TouchableOpacity>
             </View>
-
+            <View className="flex-row ">
+              <View
+                style={{ marginBottom: 4 }}
+                className={`flex-row px-5 py-2 rounded-full items-center ${
+                  item.isSelected ? "bg-white" : "bg-slate-200/50"
+                }`}
+              >
+                <MaterialIcons name={"date-range"} size={20} color="#FF7754" />
+                <Text className="pl-3 font-semibold text-[#444262]">
+                  {item.billDate ? item.billDate : item.createdAt.split("T")[0]}
+                </Text>
+              </View>
+            </View>
             <View className="flex-row  gap-2 flex-wrap">
               <View
                 style={{ marginBottom: 4 }}
@@ -224,16 +236,14 @@ const Home = (props) => {
                 </Text>
               </View>
             </View>
-            <View className=" flex-1 ">
-              <View
-                style={{ marginBottom: 4 }}
-                className={`flex-row px-5 py-2 rounded-full items-center ${
-                  item.isSelected ? "bg-white" : "bg-slate-200/50"
-                }`}
-              >
-                <Octicons name={"home"} size={20} color="#FF7754" />
-                <Text className="pl-3  text-[#444262]">{item.address}</Text>
-              </View>
+            <View
+              style={{ marginBottom: 4 }}
+              className={`flex-row px-5 py-2 rounded-full items-center mb-4 ${
+                item.isSelected ? "bg-white" : "bg-slate-200/50"
+              }`}
+            >
+              <Octicons name={"home"} size={20} color="#FF7754" />
+              <Text className="pl-3  text-[#444262]">{item.address}</Text>
             </View>
           </TouchableOpacity>
         </>
