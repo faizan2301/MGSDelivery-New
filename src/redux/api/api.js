@@ -238,6 +238,20 @@ export const api = createApi({
     // getOrders: build.query({
     // query: () => "admin-orders",
     // }),
+    getSuDoOrders: build.mutation({
+      query: (args) => {
+        console.log("sa-orders", args.body);
+        return {
+          url: "sa-orders",
+          method: "POST",
+          body: args.body,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            Authorization: `Bearer ${args.token}`,
+          },
+        };
+      },
+    }),
     //  <================================> orders Apis <================================>
 
     //  <================================> delivery boys Apis <================================>
@@ -449,4 +463,7 @@ export const {
   useTransactionMutation,
   useTransactionpostMutation,
   useGoogledistanceMutation,
+
+  // super admin
+  useGetSuDoOrdersMutation,
 } = api;
