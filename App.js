@@ -49,9 +49,10 @@ const App = () => {
     <Provider store={store}>
       <SafeAreaView className="flex-1 bg-white">
         <Routes />
-        <StatusBar style="auto" />
+
         <FlashMessage position="center" />
       </SafeAreaView>
+      <StatusBar style="dark" />
     </Provider>
   );
 };
