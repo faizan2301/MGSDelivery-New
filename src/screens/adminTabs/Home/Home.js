@@ -377,9 +377,9 @@ const Home = (props) => {
   useEffect(() => {
     if (isError) {
       if (error.data) {
-        showMessage({ message: error.data.message, type: "danger" });
+        showMessage({ message: error?.data?.message, type: "danger" });
       } else {
-        showMessage({ message: error.data.message, type: "danger" });
+        showMessage({ message: error?.data?.message, type: "danger" });
       }
     }
   }, [isError]);
