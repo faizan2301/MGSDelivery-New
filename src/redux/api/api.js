@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-const baseUrl = "http://192.168.1.4:4000";
+const baseUrl = "http://192.168.1.25:4000";
 // const baseUrl = "https://mahaveer.vercel.app/";
 export const api = createApi({
   reducerPath: "api",
